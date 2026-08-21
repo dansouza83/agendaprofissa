@@ -1,0 +1,11 @@
+{
+  "name": "Agenda Profissa",
+  "short_name": "Profissa",
+  "description": "Agenda, clientes e serviços para profissionais autônomos.",
+  "start_url": "/sistema",
+  "display": "standalone",
+  "background_color": "#08140f",
+  "theme_color": "#08140f",
+  "lang": "pt-BR",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

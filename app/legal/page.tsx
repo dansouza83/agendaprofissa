@@ -1,0 +1,8 @@
+import { SafeLink as Link } from "../safe-link";
+import { DraftNotice, LegalPage, legalMetadata, legalPages } from "../legal-shell";
+
+export const metadata = legalMetadata("Centro jurídico e de confiança", "Documentos de uso, privacidade, cookies, segurança e direitos do titular do Agenda Profissa.", "/legal");
+
+export default function LegalHub() {
+  return <LegalPage draft={false} title="Centro jurídico e de confiança" description="Encontre, em linguagem clara, as regras do serviço e os compromissos sobre privacidade e segurança."><DraftNotice/><div className="mt-8 grid gap-4 sm:grid-cols-2">{legalPages.map(([title,href,description])=><Link key={href} href={href} className="rounded-2xl border border-[#dde7e1] bg-white p-5 no-underline shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><strong className="block text-[#173f37]">{title}</strong><span className="mt-2 block text-sm leading-6 text-[#687972]">{description}</span><span className="mt-4 block text-sm font-extrabold text-[#2f7d70]">Abrir documento →</span></Link>)}</div><h2>Antes da publicação</h2><p>Este conjunto cobre os principais documentos informativos do MVP, mas a adequação jurídica depende da operação real. É indispensável preencher a identificação do fornecedor, definir o canal do encarregado ou responsável por privacidade, documentar fornecedores, prazos de retenção e procedimentos internos.</p><p>Quando forem adicionados planos pagos, PIX ou Mercado Pago, será necessário incluir condições comerciais, preços, cobrança, cancelamento, reembolso, inadimplência e emissão fiscal antes da ativação.</p></LegalPage>;
+}
