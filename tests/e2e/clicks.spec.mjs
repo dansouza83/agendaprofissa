@@ -5,10 +5,10 @@ const publicRoutes = [
   "/diretrizes", "/seguranca", "/direitos-do-titular",
 ];
 
-const sections = ["inicio", "segmentos", "recursos", "como-funciona", "para-quem", "seguranca", "faq"];
+const sections = ["inicio", "segmentos", "recursos", "como-funciona", "para-quem", "planos", "seguranca", "faq"];
 const sectionLabels = {
   inicio: "Início", segmentos: "Segmentos", recursos: "Recursos", "como-funciona": "Como funciona",
-  "para-quem": "Para quem", seguranca: "Segurança", faq: "FAQ",
+  "para-quem": "Para quem", planos: "Planos", seguranca: "Segurança", faq: "FAQ",
 };
 
 function monitorPage(page) {
@@ -78,6 +78,8 @@ test("todos os links de ação da landing page abrem a tela correta", async ({ p
     ["#inicio a[href='/sistema?cadastro=cliente']", "/sistema?cadastro=cliente"],
     ["#para-quem a[href='/sistema?cadastro=profissional']", "/sistema?cadastro=profissional"],
     ["#para-quem a[href='/sistema?cadastro=cliente']", "/sistema?cadastro=cliente"],
+    ["#planos .pricing-card:nth-of-type(1) a[href='/sistema?cadastro=profissional']", "/sistema?cadastro=profissional"],
+    ["#planos .pricing-card:nth-of-type(2) a[href='/sistema?cadastro=profissional']", "/sistema?cadastro=profissional"],
     ["#seguranca a[href='/seguranca']", "/seguranca"],
     ["#seguranca a[href='/privacidade']", "/privacidade"],
     ["#seguranca a[href='/direitos-do-titular']", "/direitos-do-titular"],
@@ -91,6 +93,16 @@ test("todos os links de ação da landing page abrem a tela correta", async ({ p
     await page.locator(selector).click();
     await expectPath(page, href);
   }
+});
+
+test("landing apresenta os preços ativos e o benefício do plano anual", async ({ page }) => {
+  await page.goto("/#planos");
+  const plans = page.locator("#planos");
+  await expect(plans.getByText("R$ 50,00", { exact: true })).toBeVisible();
+  await expect(plans.getByText("R$ 350,00", { exact: true })).toBeVisible();
+  await expect(plans.getByText("Economize R$ 250,00 por ano (42%)", { exact: true })).toBeVisible();
+  await expect(plans.getByText("Melhor custo-benefício", { exact: true })).toBeVisible();
+  await expect(plans.getByRole("link", { name: /Criar conta profissional/ })).toHaveCount(2);
 });
 
 test("todos os links do rodapé navegam ao destino declarado", async ({ page }) => {
@@ -196,6 +208,8 @@ test("cadastro alterna perfis, abre termos e valida aceite", async ({ page }) =>
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Criar conta profissional" }).click();
   await expect(page.getByRole("heading", { name: "Escolha seu plano para liberar o painel" })).toBeVisible();
+  await expect(page.getByText("R$ 50,00", { exact: true })).toBeVisible();
+  await expect(page.getByText("R$ 350,00", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Assinar plano mensal" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Assinar plano anual" })).toBeVisible();
   const savedBusiness = await page.evaluate(() => JSON.parse(localStorage.getItem("agenda-facil-local-account")).identity.business);

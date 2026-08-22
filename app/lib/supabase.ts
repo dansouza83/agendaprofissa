@@ -9,6 +9,19 @@ export const supabaseConfigured = Boolean(url && publishableKey);
 let singleton: SupabaseClient | null = null;
 const rememberKey = "agenda-facil-remember-access";
 
+export const passwordSafetyHint = "Use ao menos 12 caracteres, com letra maiúscula, minúscula, número e símbolo.";
+
+export function passwordSafetyError(password: string) {
+  if (password.length < 12) return "Use uma senha com pelo menos 12 caracteres.";
+  if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^A-Za-z0-9]/.test(password)) return passwordSafetyHint;
+  return null;
+}
+
+function requireSafePassword(password: string) {
+  const issue = passwordSafetyError(password);
+  if (issue) throw new Error(issue);
+}
+
 const authStorage = {
   getItem(key: string) {
     const storage = localStorage.getItem(rememberKey) === "false" ? sessionStorage : localStorage;
@@ -44,6 +57,14 @@ function localParts(startsAt: string, timeZone: string) {
 
 export async function signInOnline(email: string, password: string) {
   const { error } = await client().auth.signInWithPassword({ email, password });
+  if (error?.code === "email_not_confirmed" || /email not confirmed/i.test(error?.message || "")) {
+    throw new Error("E-mail ainda não confirmado. Verifique sua caixa de entrada ou solicite um novo envio.");
+  }
+  if (error) throw error;
+}
+
+export async function resendSignupConfirmation(email: string) {
+  const { error } = await client().auth.resend({ type: "signup", email });
   if (error) throw error;
 }
 
@@ -61,23 +82,26 @@ export function getRememberAccess() {
 }
 
 export async function sendPasswordRecovery(email: string) {
-  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, "");
+  const baseUrl = window.location.origin.replace(/\/$/, "");
   const { error } = await client().auth.resetPasswordForEmail(email, { redirectTo: `${baseUrl}/sistema?recuperar-senha=1` });
   if (error) throw error;
 }
 
 export async function updateRecoveredPassword(password: string) {
+  requireSafePassword(password);
   const { error } = await client().auth.updateUser({ password });
   if (error) throw error;
 }
 
 export async function updateDeveloperPassword(password: string) {
+  requireSafePassword(password);
   const { error } = await client().auth.updateUser({ password, data: { force_password_change: false } });
   if (error) throw error;
 }
 
 export async function signUpOnline(email: string, password: string, fullName: string, businessName: string, accountType: AccountType) {
-  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, "");
+  requireSafePassword(password);
+  const baseUrl = window.location.origin.replace(/\/$/, "");
   const { data, error } = await client().auth.signUp({ email, password, options: { emailRedirectTo: `${baseUrl}/sistema`, data: { full_name: fullName, business_name: businessName, account_type: accountType, legal_acceptance: true, terms_version: "2026-08-17", privacy_version: "2026-08-17" } } });
   if (error) throw error;
   return Boolean(data.session);
@@ -102,7 +126,7 @@ async function billingRequest(path: string, init?: RequestInit) {
 
 export async function subscriptionStatus() {
   const result = await billingRequest("/api/billing/status");
-  return { active: Boolean(result.active), prices: result.prices ?? { monthly: 49.9, annual: 478.8 } };
+  return { active: Boolean(result.active), prices: result.prices ?? { monthly: 50, annual: 350 } };
 }
 
 export async function startSubscriptionCheckout(plan: "monthly" | "annual") {

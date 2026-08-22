@@ -41,6 +41,32 @@ function subscriptionStatus(value: unknown) {
   return "pending";
 }
 
+async function mercadoPago(token: string, path: string) {
+  const response = await fetch(`https://api.mercadopago.com${path}`, { headers: { Authorization: `Bearer ${token}` } });
+  const body = await response.json() as Record<string, unknown>;
+  if (!response.ok) throw new Error("O Mercado Pago recusou a consulta.");
+  return body;
+}
+
+function paymentDetails(invoice: Record<string, unknown>, expectedCents: number) {
+  const payment = invoice.payment as Record<string, unknown> | undefined;
+  const amountCents = Math.round(Number(invoice.transaction_amount) * 100);
+  const rawStatus = String(payment?.status || "pending");
+  const status = rawStatus === "approved" || rawStatus === "rejected" || rawStatus === "cancelled" || rawStatus === "refunded" ? rawStatus : "pending";
+  if (invoice.currency_id !== "BRL" || amountCents !== expectedCents || typeof payment?.id === "undefined") return null;
+  return {
+    provider_payment_id: String(payment.id),
+    payment_status: status,
+    payment_confirmed_at: status === "approved" ? (typeof invoice.last_modified === "string" ? invoice.last_modified : new Date().toISOString()) : null,
+  };
+}
+
+async function subscriptionByProvider(subscriptionId: string) {
+  const { data, error } = await service.from("subscriptions").select("tenant_id, provider_subscription_id, amount_cents").eq("provider_subscription_id", subscriptionId).maybeSingle();
+  if (error) throw error;
+  return data as { tenant_id: string; provider_subscription_id: string | null; amount_cents: number } | null;
+}
+
 Deno.serve(async (request) => {
   if (request.method !== "POST") return json({ error: "Método não permitido." }, 405);
   try {
@@ -48,19 +74,39 @@ Deno.serve(async (request) => {
     const dataId = String(body.data?.id ?? new URL(request.url).searchParams.get("data.id") ?? "");
     const config = await credentials();
     if (!dataId || !(await validSignature(request, dataId, config.webhook_secret))) return json({ error: "Assinatura inválida." }, 401);
-    if (body.type && body.type !== "subscription_preapproval") return json({ received: true });
-    const response = await fetch(`https://api.mercadopago.com/preapproval/${encodeURIComponent(dataId)}`, { headers: { Authorization: `Bearer ${config.access_token}` } });
-    const remote = await response.json() as Record<string, unknown>;
-    if (!response.ok) return json({ error: "O Mercado Pago recusou a consulta." }, 502);
-    const tenantId = String(remote.external_reference || "");
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tenantId)) return json({ error: "Referência inválida." }, 400);
-    const { error } = await service.from("subscriptions").update({
-      provider_subscription_id: String(remote.id || dataId),
-      status: subscriptionStatus(remote.status),
-      current_period_end: typeof remote.next_payment_date === "string" ? remote.next_payment_date : null,
-      updated_at: new Date().toISOString(),
-    }).eq("tenant_id", tenantId);
-    if (error) throw error;
+    if (body.type === "subscription_preapproval") {
+      const remote = await mercadoPago(config.access_token, `/preapproval/${encodeURIComponent(dataId)}`);
+      const tenantId = String(remote.external_reference || "");
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tenantId)) return json({ error: "Referência inválida." }, 400);
+      const { error } = await service.from("subscriptions").update({
+        provider_subscription_id: String(remote.id || dataId),
+        status: subscriptionStatus(remote.status),
+        current_period_end: typeof remote.next_payment_date === "string" ? remote.next_payment_date : null,
+        updated_at: new Date().toISOString(),
+      }).eq("tenant_id", tenantId);
+      if (error) throw error;
+      return json({ received: true });
+    }
+
+    if (body.type === "subscription_authorized_payment") {
+      const invoice = await mercadoPago(config.access_token, `/authorized_payments/${encodeURIComponent(dataId)}`);
+      const subscriptionId = String(invoice.preapproval_id || "");
+      if (!subscriptionId) return json({ received: true });
+      const subscription = await subscriptionByProvider(subscriptionId);
+      if (!subscription) return json({ received: true });
+      const payment = paymentDetails(invoice, Number(subscription.amount_cents));
+      if (!payment) return json({ received: true });
+      const preapproval = await mercadoPago(config.access_token, `/preapproval/${encodeURIComponent(subscriptionId)}`);
+      const { error } = await service.from("subscriptions").update({
+        status: subscriptionStatus(preapproval.status),
+        current_period_end: typeof preapproval.next_payment_date === "string" ? preapproval.next_payment_date : null,
+        ...payment,
+        updated_at: new Date().toISOString(),
+      }).eq("tenant_id", subscription.tenant_id).eq("provider_subscription_id", subscriptionId);
+      if (error) throw error;
+      return json({ received: true });
+    }
+
     return json({ received: true });
   } catch {
     return json({ error: "Falha ao processar a notificação." }, 500);

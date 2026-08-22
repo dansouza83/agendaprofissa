@@ -3,8 +3,13 @@ import "./globals.css";
 import "./landing.css";
 import { PwaRegistration } from "./pwa";
 
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+const metadataSiteUrl = configuredSiteUrl && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredSiteUrl)
+  ? configuredSiteUrl
+  : "https://agenda-profissa.dansouzafloripa.chatgpt.site";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(metadataSiteUrl),
   title: { default: "Agenda Profissa — Gestão de agendamentos", template: "%s" },
   description: "Agenda, clientes e serviços para profissionais autônomos.",
   manifest: "/manifest.webmanifest",

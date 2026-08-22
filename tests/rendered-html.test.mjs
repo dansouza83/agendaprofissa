@@ -19,6 +19,8 @@ test("renderiza a landing page pública em português", async () => {
   assert.match(html, /Criar perfil profissional/);
   assert.match(html, /Sou aluno ou cliente/);
   assert.match(html, /Perguntas frequentes/);
+  assert.match(html, /Invista na organização que acompanha o seu negócio todos os dias/);
+  assert.match(html, /href="\/#planos"/);
   assert.match(html, /aria-label="Atalhos da página"/);
   assert.match(html, /href="\/#para-quem"/);
   assert.match(html, /<html[^>]*class="dark"/);
@@ -38,12 +40,28 @@ test("renderiza cadastro de profissional e aluno ou cliente", async () => {
   assert.match(source, /Nome do negócio/);
   assert.match(source, /Criar perfil de aluno\/cliente/);
   assert.match(source, /Termos de Uso/);
+  assert.match(source, /monthly:50,annual:350/);
+});
+
+test("publica os preços ativos sem expor credenciais do Mercado Pago", async () => {
+  const pricingSource = await readFile(new URL("../app/public-pricing.tsx", import.meta.url), "utf8");
+  const functionSource = await readFile(new URL("../supabase/functions/agenda-public-pricing/index.ts", import.meta.url), "utf8");
+  const configSource = await readFile(new URL("../supabase/config.toml", import.meta.url), "utf8");
+  assert.match(pricingSource, /monthlyPrice: 50/);
+  assert.match(pricingSource, /annualPrice: 350/);
+  assert.match(pricingSource, /Economize/);
+  assert.match(functionSource, /monthlyPrice: Number\(current\.monthly_price\)/);
+  assert.match(functionSource, /annualPrice: Number\(current\.annual_price\)/);
+  assert.match(functionSource, /currency: "BRL"/);
+  assert.doesNotMatch(functionSource, /access_token|client_secret|public_key|monthly_plan_id/i);
+  assert.match(configSource, /\[functions\.agenda-public-pricing\]\s+verify_jwt = false/);
 });
 
 test("mantém todas as páginas jurídicas acessíveis", async () => {
   const expected = new Map([
     ["/legal", "Centro jurídico e de confiança"],
     ["/termos", "Termos de Uso"],
+    ["/antifraude", "Pagamentos e Prevenção a Fraudes"],
     ["/privacidade", "Aviso de Privacidade"],
     ["/cookies", "Política de Cookies"],
     ["/diretrizes", "Diretrizes de Uso"],
@@ -58,6 +76,15 @@ test("mantém todas as páginas jurídicas acessíveis", async () => {
   }
 });
 
+test("explica proteção contra fraude e preserva direitos do consumidor", async () => {
+  const termsSource = await readFile(new URL("../app/termos/page.tsx", import.meta.url), "utf8");
+  const antiFraudSource = await readFile(new URL("../app/antifraude/page.tsx", import.meta.url), "utf8");
+  assert.match(termsSource, /direito de arrependimento será respeitado nos termos da lei/);
+  assert.match(termsSource, /meio eletrônico eficaz para cancelamento/);
+  assert.match(antiFraudSource, /não confirmam pagamento, não substituem a validação do processador e não liberam acesso/);
+  assert.match(antiFraudSource, /nunca envie senha ou código de acesso/i);
+});
+
 test("abre o aplicativo instalado diretamente no sistema", async () => {
   const manifest = JSON.parse(await readFile(new URL("../public/manifest.webmanifest", import.meta.url), "utf8"));
   assert.equal(manifest.lang, "pt-BR");
@@ -65,4 +92,63 @@ test("abre o aplicativo instalado diretamente no sistema", async () => {
   assert.equal(manifest.display, "standalone");
   assert.equal(manifest.background_color, "#08140f");
   assert.equal(manifest.theme_color, "#08140f");
+});
+
+test("preserva o ambiente selecionado e confirma a gravação segura das credenciais", async () => {
+  const developerSource = await readFile(new URL("../app/desenvolvedor/client.tsx", import.meta.url), "utf8");
+  const billingSource = await readFile(new URL("../supabase/functions/agenda-billing/index.ts", import.meta.url), "utf8");
+  assert.match(developerSource, /cache:"no-store"/);
+  assert.match(developerSource, /\[selectedEnvironment\]:result\.credentials/);
+  assert.match(developerSource, /salvo, relido e confirmado no cofre/);
+  assert.match(developerSource, /Credenciais gravadas no cofre/);
+  assert.match(developerSource, /os campos são limpos por segurança/);
+  assert.match(billingSource, /As credenciais não puderam ser confirmadas após a gravação/);
+  assert.match(billingSource, /credentials: credentialSummary\(stored\)/);
+});
+
+test("não armazena respostas privadas do painel no cache", async () => {
+  const proxySource = await readFile(new URL("../app/lib/billing-server.ts", import.meta.url), "utf8");
+  const workerSource = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
+  assert.match(proxySource, /private, no-store, max-age=0/);
+  assert.match(proxySource, /Vary: "Authorization"/);
+  assert.match(workerSource, /url\.pathname\.startsWith\("\/api\/"\)/);
+  assert.match(workerSource, /event\.request\.mode === "navigate"/);
+});
+
+test("usa a origem HTTPS pública nas URLs de retorno do Mercado Pago", async () => {
+  const proxySource = await readFile(new URL("../app/lib/billing-server.ts", import.meta.url), "utf8");
+  const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
+  const billingSource = await readFile(new URL("../supabase/functions/agenda-billing/index.ts", import.meta.url), "utf8");
+  assert.match(proxySource, /new URL\(request\.url\)\.origin/);
+  assert.doesNotMatch(proxySource, /NEXT_PUBLIC_SITE_URL \|\| new URL\(request\.url\)\.origin/);
+  assert.match(authSource, /window\.location\.origin\.replace/);
+  assert.match(billingSource, /url\.protocol !== "https:"/);
+  assert.match(billingSource, /paymentReturnUrl\(input\.siteUrl\)/);
+  assert.match(billingSource, /new URL\("\/sistema\?pagamento=retorno", origin\)/);
+});
+
+test("só libera o painel após pagamento Mercado Pago aprovado", async () => {
+  const systemSource = await readFile(new URL("../app/sistema/client.tsx", import.meta.url), "utf8");
+  const billingSource = await readFile(new URL("../supabase/functions/agenda-billing/index.ts", import.meta.url), "utf8");
+  const webhookSource = await readFile(new URL("../supabase/functions/agenda-mp-webhook/index.ts", import.meta.url), "utf8");
+  const migrationSource = await readFile(new URL("../supabase/migrations/20260822033140_require_confirmed_payment_for_access.sql", import.meta.url), "utf8");
+  assert.match(systemSource, /ele não confirma manualmente nem libera o painel/);
+  assert.match(systemSource, /Verificar pagamento no Mercado Pago/);
+  assert.match(billingSource, /subscription\?\.status === "authorized" && subscription\.payment_status === "approved"/);
+  assert.match(billingSource, /authorized_payments\/search\?preapproval_id=/);
+  assert.match(webhookSource, /body\.type === "subscription_authorized_payment"/);
+  assert.match(webhookSource, /invoice\.currency_id !== "BRL" \|\| amountCents !== expectedCents/);
+  assert.match(migrationSource, /s\.status = 'authorized'\s+and s\.payment_status = 'approved'/);
+});
+
+test("exige senhas fortes e configura proteção de autenticação", async () => {
+  const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
+  const systemSource = await readFile(new URL("../app/sistema/client.tsx", import.meta.url), "utf8");
+  const configSource = await readFile(new URL("../supabase/config.toml", import.meta.url), "utf8");
+  assert.match(authSource, /password\.length < 12/);
+  assert.match(authSource, /\[a-z\].*\[A-Z\].*\\d/);
+  assert.match(systemSource, /passwordSafetyHint/);
+  assert.match(configSource, /minimum_password_length = 12/);
+  assert.match(configSource, /password_requirements = "lower_upper_letters_digits_symbols"/);
+  assert.match(configSource, /secure_password_change = true/);
 });

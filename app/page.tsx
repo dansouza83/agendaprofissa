@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SafeLink as Link } from "./safe-link";
 import { PublicFooter, PublicHeader } from "./public-shell";
+import { PublicPricing } from "./public-pricing";
 
 export const metadata: Metadata = {
   title: "Agenda Profissa — Agendamentos simples para quem cuida de pessoas",
@@ -56,7 +57,7 @@ const faqs = [
   ["Qual é a diferença entre perfil profissional e aluno/cliente?", "O profissional administra agenda, serviços e sua carteira de clientes. O aluno ou cliente usa uma área própria para acompanhar os agendamentos vinculados a ele, sem acesso ao painel do negócio."],
   ["Consigo recuperar minha senha?", "Sim. No ambiente online, o usuário solicita um link de recuperação por e-mail e cria uma nova senha com segurança."],
   ["A senha fica salva no aparelho?", "Não. Ao escolher manter o acesso, o sistema conserva somente uma sessão segura; a senha não é armazenada pelo aplicativo."],
-  ["Haverá cobrança por PIX ou Mercado Pago?", "A arquitetura já prevê essa evolução, mas pagamentos ainda não fazem parte desta versão. Nenhuma cobrança é realizada no MVP."],
+  ["Como funciona o pagamento?", "O profissional escolhe a cobrança mensal ou anual pelos valores atualizados exibidos na seção Planos. O pagamento recorrente é processado em reais pelo Mercado Pago e o painel é liberado após a confirmação."],
 ];
 
 export default function LandingPage() {
@@ -83,7 +84,7 @@ export default function LandingPage() {
                 <Link className="landing-button landing-button-secondary" href="/sistema?cadastro=cliente">Sou aluno ou cliente</Link>
               </div>
               <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-[#60726c]">
-                <span>✓ Acesso pelo celular</span><span>✓ Sem cartão no MVP</span><span>✓ Dados separados por negócio</span>
+                <span>✓ Acesso pelo celular</span><span>✓ Planos mensal e anual</span><span>✓ Dados separados por negócio</span>
               </div>
             </div>
 
@@ -165,6 +166,17 @@ export default function LandingPage() {
               <ul><li>Perfil pessoal separado</li><li>Próprios agendamentos</li><li>Acesso e recuperação seguros</li></ul>
               <Link href="/sistema?cadastro=cliente">Criar perfil de aluno/cliente →</Link>
             </article>
+          </div>
+        </section>
+
+        <section id="planos" className="landing-pricing scroll-mt-32 border-y border-[#dfe9e3] bg-white px-4 py-20 sm:px-6 lg:scroll-mt-24 lg:py-28">
+          <div className="mx-auto max-w-7xl">
+            <SectionIntro centered eyebrow="Planos para profissionais" title="Invista na organização que acompanha o seu negócio todos os dias." text="Os dois planos liberam o painel profissional completo. Escolha a flexibilidade do pagamento mensal ou a economia e a previsibilidade do plano anual." />
+            <PublicPricing />
+            <div className="pricing-assurance mx-auto mt-8 max-w-5xl">
+              <span aria-hidden="true">✓</span>
+              <p><strong>Liberação após confirmação.</strong> O pagamento é processado pelo Mercado Pago. O Agenda Profissa não armazena os dados do seu cartão.</p>
+            </div>
           </div>
         </section>
 

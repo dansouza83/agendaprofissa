@@ -19,7 +19,10 @@ const sections = [
   ["Privacidade e operação", [
     ["Minha senha é gravada quando mantenho o acesso?", "Não. O aplicativo conserva a sessão autorizada, nunca a senha digitada."],
     ["Posso cadastrar informações de saúde?", "Evite dados sensíveis no campo de observações. Operações que realmente precisem deles exigem avaliação jurídica, base legal e controles adicionais."],
-    ["O Agenda Profissa processa pagamentos?", "Ainda não. PIX e Mercado Pago estão previstos apenas na arquitetura futura."],
+    ["Como funciona a assinatura profissional?", "O profissional escolhe o plano mensal ou anual exibido na página de planos. A cobrança recorrente é processada em reais pelo Mercado Pago, e o painel é liberado após a confirmação."],
+    ["O Agenda Profissa guarda os dados do meu cartão?", "Não. O pagamento é processado pelo Mercado Pago; o Agenda Profissa não armazena os dados completos do cartão."],
+    ["Um comprovante PIX libera o painel?", <>Não. O acesso só é liberado quando o Mercado Pago confirma o pagamento aprovado. Veja <Link href="/antifraude">Pagamentos e Prevenção a Fraudes</Link>.</>],
+    ["Como reconheço uma cobrança oficial?", <>Use somente a contratação iniciada dentro do Agenda Profissa e o ambiente oficial do Mercado Pago. Nunca envie senha ou código de acesso. Veja <Link href="/antifraude">orientações contra golpes</Link>.</>],
     ["Como solicito acesso ou exclusão dos meus dados?", <>Consulte a página <Link href="/direitos-do-titular">Direitos do Titular</Link> e utilize o canal de privacidade indicado após a publicação.</>],
   ]],
 ] as const;

@@ -12,16 +12,23 @@ export async function edgeJson(request: Request, functionName: string, payload: 
   const env = configured();
   const response = await fetch(`${env.supabaseUrl}/functions/v1/${functionName}`, {
     method: "POST",
+    cache: "no-store",
     headers: {
       apikey: env.publishableKey,
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+      "Cache-Control": "no-store",
     },
     body: JSON.stringify(payload),
   });
   return new Response(await response.text(), {
     status: response.status,
-    headers: { "Content-Type": response.headers.get("content-type") || "application/json" },
+    headers: {
+      "Content-Type": response.headers.get("content-type") || "application/json",
+      "Cache-Control": "private, no-store, max-age=0",
+      Pragma: "no-cache",
+      Vary: "Authorization",
+    },
   });
 }
 
@@ -44,5 +51,5 @@ export async function edgeWebhook(request: Request) {
 }
 
 export function publicSiteUrl(request: Request) {
-  return (process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin).replace(/\/$/, "");
+  return new URL(request.url).origin.replace(/\/$/, "");
 }
