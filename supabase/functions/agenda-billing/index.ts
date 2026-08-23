@@ -108,6 +108,10 @@ function activeSubscription(subscription: Pick<StoredSubscription, "status" | "p
   return subscription?.status === "authorized" && subscription.payment_status === "approved";
 }
 
+function isSeedSubscription(subscriptionId: string | null) {
+  return Boolean(subscriptionId?.startsWith("test-"));
+}
+
 function environmentOf(value: unknown): Environment | undefined {
   return value === "test" || value === "production" ? value : undefined;
 }
@@ -203,7 +207,7 @@ Deno.serve(async (request) => {
       if (error) throw error;
       const current = data as StoredSubscription | null;
       const config = await credentials();
-      if (current?.provider_subscription_id) {
+      if (current?.provider_subscription_id && !isSeedSubscription(current.provider_subscription_id)) {
         const remote = await mercadoPago(config.access_token, `/preapproval/${encodeURIComponent(current.provider_subscription_id)}`);
         const status = subscriptionStatus(remote.status);
         const currentPeriodEnd = typeof remote.next_payment_date === "string" ? remote.next_payment_date : null;

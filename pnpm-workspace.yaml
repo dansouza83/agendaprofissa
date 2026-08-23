@@ -1,6 +1,8 @@
 allowBuilds:
   esbuild: true
+  netlify-cli: set this to true or false
   sharp: true
+  unix-dgram: set this to true or false
   workerd: true
 onlyBuiltDependencies:
   - esbuild

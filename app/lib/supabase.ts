@@ -5,15 +5,28 @@ export type AccountType = "professional" | "client";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
+const allowLocalSignupWithoutCaptcha = process.env.NEXT_PUBLIC_ALLOW_LOCAL_SIGNUP_WITHOUT_CAPTCHA === "true";
 export const supabaseConfigured = Boolean(url && publishableKey);
+export const captchaProtectionConfigured = Boolean(turnstileSiteKey);
 let singleton: SupabaseClient | null = null;
 const rememberKey = "agenda-facil-remember-access";
 
-export const passwordSafetyHint = "Use ao menos 12 caracteres, com letra maiúscula, minúscula, número e símbolo.";
+function localSignupBypassAllowed() {
+  if (!allowLocalSignupWithoutCaptcha || typeof window === "undefined") return false;
+  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+}
+
+/** CAPTCHA stays mandatory for every published address. The bypass is limited to an explicit local test build. */
+export function shouldRequireCaptcha() {
+  return captchaProtectionConfigured || !localSignupBypassAllowed();
+}
+
+export const passwordSafetyHint = "Use ao menos 8 caracteres, com letras e números.";
 
 export function passwordSafetyError(password: string) {
-  if (password.length < 12) return "Use uma senha com pelo menos 12 caracteres.";
-  if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^A-Za-z0-9]/.test(password)) return passwordSafetyHint;
+  if (password.length < 8) return "Use uma senha com pelo menos 8 caracteres.";
+  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return passwordSafetyHint;
   return null;
 }
 
@@ -99,10 +112,13 @@ export async function updateDeveloperPassword(password: string) {
   if (error) throw error;
 }
 
-export async function signUpOnline(email: string, password: string, fullName: string, businessName: string, accountType: AccountType) {
+export async function signUpOnline(email: string, password: string, fullName: string, businessName: string, accountType: AccountType, captchaToken: string) {
   requireSafePassword(password);
+  const captchaRequired = shouldRequireCaptcha();
+  if (captchaRequired && !captchaProtectionConfigured) throw new Error("O cadastro online está temporariamente indisponível enquanto a proteção anti-bot é configurada.");
+  if (captchaRequired && !captchaToken) throw new Error("Conclua a verificação anti-bot antes de criar sua conta.");
   const baseUrl = window.location.origin.replace(/\/$/, "");
-  const { data, error } = await client().auth.signUp({ email, password, options: { emailRedirectTo: `${baseUrl}/sistema`, data: { full_name: fullName, business_name: businessName, account_type: accountType, legal_acceptance: true, terms_version: "2026-08-17", privacy_version: "2026-08-17" } } });
+  const { data, error } = await client().auth.signUp({ email, password, options: { ...(captchaRequired ? { captchaToken } : {}), emailRedirectTo: `${baseUrl}/sistema`, data: { full_name: fullName, business_name: businessName, account_type: accountType, legal_acceptance: true, terms_version: "2026-08-17", privacy_version: "2026-08-17" } } });
   if (error) throw error;
   return Boolean(data.session);
 }
