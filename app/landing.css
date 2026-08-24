@@ -43,3 +43,62 @@ html:not(.dark) .landing [class*="text-[#60726c]"],html:not(.dark) .landing [cla
   .landing-hero{min-height:calc(100svh - 72px)}
   .landing-hero-title{font-size:clamp(2.75rem,4.2vw,3.7rem)}
 }
+
+/* Demais seções: cada tópico ocupa uma dobra de forma equilibrada em telas largas. */
+@media(min-width:1024px){
+  .landing{--landing-section-height:calc(100svh - 116px)}
+  .landing>main>section[id]:not(#inicio),.landing-final-cta{display:flex;min-height:var(--landing-section-height);align-items:center;padding-top:clamp(1.5rem,3.5vh,3rem);padding-bottom:clamp(1.5rem,3.5vh,3rem)}
+  .landing>main>section[id]:not(#inicio)>div,.landing-final-cta>.landing-cta{width:100%}
+
+  #segmentos .section-title{font-size:clamp(2rem,3.5vw,2.7rem)}
+  #segmentos .segment-grid{margin-top:1.5rem}
+  #segmentos .segment-card{height:130px;border-radius:22px}
+  #segmentos .segment-card-1,#segmentos .segment-card-2{height:170px}
+  #segmentos .segment-content{padding:1.15rem}
+  #segmentos .segment-content h3{font-size:1.35rem}
+  #segmentos .segment-content p{margin-top:.3rem;font-size:.74rem;line-height:1.4}
+
+  #recursos .resource-grid,#como-funciona .steps-grid{margin-top:2rem}
+  #recursos .feature-card{padding:.9rem}
+  #recursos .feature-card p{margin-top:.5rem;font-size:.76rem;line-height:1.4}
+  #como-funciona .step-card{padding:.95rem}
+  #como-funciona .step-card p{margin-top:.55rem;font-size:.76rem;line-height:1.4}
+
+  #para-quem .audience-card{padding:1.35rem}
+  #para-quem .audience-card h2{margin-top:1rem;font-size:clamp(1.65rem,2.6vw,2.25rem)}
+  #para-quem .audience-card p{margin-top:.65rem;font-size:.82rem;line-height:1.45}
+  #para-quem .audience-card ul{margin-top:.9rem;font-size:.78rem}
+  #para-quem .audience-card a{margin-top:1rem;font-size:.8rem}
+
+  #planos .pricing-value-grid{margin-top:1.5rem}
+  #planos .mx-auto.max-w-3xl{max-width:60rem}
+  #planos .section-title{font-size:clamp(2.2rem,3.8vw,3rem)}
+  #planos .mx-auto.max-w-3xl>p{margin-top:.75rem;font-size:.95rem;line-height:1.5}
+  #planos .pricing-grid{margin-top:1rem}
+  #planos .pricing-card{padding:1.25rem}
+  #planos .pricing-headline{margin-top:.7rem}
+  #planos .pricing-card>div.mt-5{margin-top:.8rem}
+  #planos .pricing-note{margin-top:.5rem;font-size:.76rem;line-height:1.35}
+  #planos .pricing-highlight{margin-top:.65rem;padding:.6rem .75rem;font-size:.74rem}
+  #planos .pricing-divider{margin:1rem 0}
+  #planos .pricing-benefits{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:.8rem}
+  #planos .pricing-benefits li{gap:.45rem;font-size:.73rem;line-height:1.3}
+  #planos .pricing-benefits li span{width:18px;height:18px;font-size:.6rem}
+  #planos .pricing-card .landing-button{min-height:44px;margin-top:1rem;padding:.65rem .9rem;font-size:.78rem}
+  #planos .pricing-assurance{margin-top:1rem;padding:.75rem .9rem}
+
+  #seguranca{padding-top:clamp(1.5rem,4vh,3rem);padding-bottom:clamp(1.5rem,4vh,3rem)}
+  #seguranca .security-mark{padding:1rem}
+  #seguranca .security-mark>span{width:54px;height:54px;border-radius:17px;font-size:1.5rem}
+  #seguranca .text-link-chip{padding:.55rem .8rem}
+
+  #faq .faq-item summary{min-height:48px;font-size:.88rem}
+  #faq .faq-item p{padding-bottom:.9rem;font-size:.85rem;line-height:1.55}
+  #faq .divide-y{margin-top:1.5rem}
+  #faq .mt-8.text-center{margin-top:1.25rem}
+
+  .landing-final-cta>.landing-cta{padding-top:clamp(2rem,5vh,4rem);padding-bottom:clamp(2rem,5vh,4rem)}
+  .landing-final-cta .landing-cta h2{margin-top:.8rem;font-size:clamp(2rem,4vw,3.25rem)}
+  .landing-final-cta .landing-cta .mt-8{margin-top:1.5rem}
+}
+@media(min-width:1280px){.landing{--landing-section-height:calc(100svh - 72px)}}

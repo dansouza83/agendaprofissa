@@ -197,7 +197,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="px-4 pb-20 sm:px-6 lg:pb-28">
+        <section className="landing-final-cta px-4 pb-20 sm:px-6 lg:pb-28">
           <div className="landing-cta relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-[#e9a878] px-6 py-14 text-center text-[#18362f] sm:px-10 lg:py-20">
             <div className="absolute -right-16 -top-20 h-60 w-60 rounded-full border-[40px] border-white/15" aria-hidden="true" />
             <p className="text-xs font-black uppercase tracking-[.18em]">Sua agenda pode ser mais leve</p>
