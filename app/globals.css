@@ -39,6 +39,17 @@ html:not(.dark) .system-theme [class*="bg-[#eaf4f0]"] small{color:#3e675e;opacit
 .developer-shell .breadcrumbs [aria-current="page"],.developer-shell .breadcrumbs .breadcrumb-separator,html:not(.dark) .developer-shell .breadcrumbs [aria-current="page"],html:not(.dark) .developer-shell .breadcrumbs .breadcrumb-separator{color:#a7bbb3}
 
 @media(max-width:420px){.public-header .public-create-account{font-size:.76rem;padding-inline:.65rem}.public-header .theme-toggle{width:38px;height:38px}.public-header>div{gap:.4rem}}@media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}
+/* Formulários compactos: mantém os controles com 44px para toque confortável. */
+.auth-form-full{grid-column:1/-1}
+@media(min-width:640px){
+  .auth-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .auth-form>fieldset,.auth-form>p,.auth-form>button,.auth-form>.auth-turnstile,.auth-form>div:not(.label){grid-column:1/-1}
+  .password-reset-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .password-reset-form>p,.password-reset-form>button{grid-column:1/-1}
+  .developer-auth-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .developer-auth-form>p,.developer-auth-form>button{grid-column:1/-1}
+}
+
 :root { --ink:#17221f; --green:#2f7d70; --line:#e3e9e5; }
 * { box-sizing:border-box } body { margin:0; background:#f7f8f6; color:var(--ink); font-family:Arial,Helvetica,sans-serif } button,input,select,textarea{font:inherit} button{cursor:pointer}
 .card{border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 2px 8px #213a3210}.eyebrow{font-size:.69rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#71807b}.title{font-size:clamp(1.65rem,3vw,2.1rem);font-weight:850;letter-spacing:-.035em}.btn{display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:.4rem;border-radius:12px;padding:.7rem 1.05rem;font-size:.875rem;font-weight:750}.btn-primary{border:1px solid var(--green);background:var(--green);color:#fff;box-shadow:0 6px 15px #2f7d7028}.btn-primary:hover{background:#276d62}.btn-secondary{border:1px solid #d9e0dc;background:#fff;color:#44534e}.input{width:100%;min-height:44px;border:1px solid #dce3df;border-radius:12px;background:#fff;padding:.7rem .85rem;outline:none}.input:focus{border-color:#5c9d91;box-shadow:0 0 0 3px #2f7d7019}.label{display:grid;gap:.4rem;font-size:.8rem;font-weight:750;color:#44514d}.avatar{display:grid;width:42px;height:42px;flex:none;place-items:center;border-radius:999px;background:#dceee8;color:#245e54;font-size:.76rem;font-weight:800}.status{border-radius:999px;padding:.3rem .58rem;font-size:.66rem;font-weight:750}.confirmado{background:#e5f3ed;color:#24705f}.pendente{background:#fff2dc;color:#97671d}.concluido{background:#e8eff8;color:#41698f}.cancelado{background:#fae7e7;color:#a74444}.toast{position:fixed;left:50%;bottom:6rem;z-index:60;transform:translateX(-50%);border-radius:12px;background:#183b34;padding:.8rem 1.2rem;color:#fff;font-size:.85rem;font-weight:700;box-shadow:0 12px 35px #0003}.menu summary{list-style:none}.menu-box{position:absolute;right:0;z-index:20;width:175px;border:1px solid var(--line);border-radius:12px;background:white;padding:4px;box-shadow:0 15px 35px #17221f25}.menu-box button{display:block;width:100%;border-radius:8px;padding:.6rem;text-align:left;font-size:.78rem}.menu-box button:hover{background:#f2f5f3}@media(min-width:1024px){.toast{bottom:2rem}}
