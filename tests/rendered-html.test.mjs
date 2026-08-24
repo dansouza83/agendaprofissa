@@ -41,6 +41,8 @@ test("renderiza cadastro de profissional e aluno ou cliente", async () => {
   assert.match(source, /Criar perfil de aluno\/cliente/);
   assert.match(source, /Termos de Uso/);
   assert.match(source, /monthly:50,annual:350/);
+  assert.doesNotMatch(source, /Acesso profissional — assinatura ativa/);
+  assert.doesNotMatch(source, /Acesso aluno\/cliente — atendimento pago/);
 });
 
 test("publica os preços ativos sem expor credenciais do Mercado Pago", async () => {
