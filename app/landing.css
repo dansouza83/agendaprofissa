@@ -26,3 +26,20 @@ html:not(.dark) .landing [class*="text-[#60726c]"],html:not(.dark) .landing [cla
 .dark .preview-window [class*="text-[#2f7d70]"]{color:#86d2bd}
 .dark .preview-side div:not(.preview-logo){color:#9eb7ae}
 .dark .preview-window .preview-avatar,.dark .preview-window .preview-row em{color:#1d5b52!important}
+
+/* Primeira dobra: conteúdo prioritário visível sem desperdício de altura. */
+@media(min-width:1024px){
+  .landing-hero{display:grid;min-height:calc(100svh - 116px);align-items:center;padding-top:clamp(1rem,3vh,2rem);padding-bottom:clamp(1rem,3vh,2rem)}
+  .landing-hero-grid{width:100%}
+  .landing-hero-title{font-size:clamp(2.55rem,4.2vw,3.55rem)}
+  .landing-hero-description{margin-top:1rem;font-size:1rem;line-height:1.65}
+  .landing-hero-actions{margin-top:1.25rem}
+  .landing-hero-benefits{margin-top:1.1rem;gap:.65rem 1.25rem;font-size:.84rem}
+  .landing-hero .preview-window>div:last-child{min-height:370px}
+  .landing-hero .preview-float{bottom:-18px}
+  .hero-orb-one{right:-5rem;top:-5rem;width:30rem;height:30rem}
+}
+@media(min-width:1280px){
+  .landing-hero{min-height:calc(100svh - 72px)}
+  .landing-hero-title{font-size:clamp(2.75rem,4.2vw,3.7rem)}
+}

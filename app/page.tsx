@@ -65,25 +65,25 @@ export default function LandingPage() {
     <div className="landing min-h-screen overflow-hidden bg-[#f8faf7] text-[#17302a]">
       <PublicHeader />
       <main>
-        <section id="inicio" className="relative isolate scroll-mt-32 border-b border-[#dfe9e3] px-4 pb-16 pt-14 sm:px-6 lg:scroll-mt-24 lg:pb-24 lg:pt-20">
+        <section id="inicio" className="landing-hero relative isolate scroll-mt-32 border-b border-[#dfe9e3] px-4 py-10 sm:px-6 lg:scroll-mt-24">
           <div className="hero-orb hero-orb-one" aria-hidden="true" />
           <div className="hero-orb hero-orb-two" aria-hidden="true" />
-          <div className="relative mx-auto grid min-w-0 max-w-7xl items-center gap-14 lg:grid-cols-[.92fr_1.08fr]">
-            <div className="min-w-0 max-w-2xl">
+          <div className="landing-hero-grid relative mx-auto grid min-w-0 max-w-7xl items-center gap-10 lg:grid-cols-[.92fr_1.08fr]">
+            <div className="landing-hero-copy min-w-0 max-w-2xl">
               <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-[#c9ded5] bg-white/80 px-3 py-2 text-xs font-extrabold uppercase tracking-[.14em] text-[#2f7d70] shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-[#e59467]" /> Feito para profissionais que cuidam de pessoas
               </span>
-              <h1 className="mt-7 text-4xl font-black leading-[1.02] tracking-[-.055em] text-[#153a32] sm:text-6xl lg:text-[4.5rem]">
+              <h1 className="landing-hero-title mt-5 text-4xl font-black leading-[1.02] tracking-[-.055em] text-[#153a32] sm:text-6xl">
                 Sua rotina organizada. Seu atendimento mais humano.
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-8 text-[#5d7069]">
+              <p className="landing-hero-description mt-5 max-w-xl text-lg leading-8 text-[#5d7069]">
                 Agenda, clientes e serviços reunidos em uma experiência simples para esteticistas, cabeleireiros, personal trainers e profissionais autônomos.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="landing-hero-actions mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link className="landing-button landing-button-primary" href="/sistema?cadastro=profissional">Criar perfil profissional <span>→</span></Link>
                 <Link className="landing-button landing-button-secondary" href="/sistema?cadastro=cliente">Sou aluno ou cliente</Link>
               </div>
-              <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-[#60726c]">
+              <div className="landing-hero-benefits mt-5 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-[#60726c]">
                 <span>✓ Acesso pelo celular</span><span>✓ Planos mensal e anual</span><span>✓ Dados separados por negócio</span>
               </div>
             </div>
