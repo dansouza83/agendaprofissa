@@ -2,14 +2,10 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "./breadcrumbs";
 import { SafeLink as Link } from "./safe-link";
 import { PublicFooter, PublicHeader } from "./public-shell";
+import { LegalCompanyIdentification, LegalContact, LegalIdentityNotice, legalIdentityPlaceholder } from "./legal-identity";
 
-export const legalIdentity = {
-  legalName: "[PREENCHER RAZÃO SOCIAL OU NOME DO RESPONSÁVEL]",
-  document: "[PREENCHER CNPJ OU CPF]",
-  address: "[PREENCHER ENDEREÇO COMERCIAL]",
-  privacyEmail: "[PREENCHER E-MAIL DE PRIVACIDADE]",
-  supportEmail: "[PREENCHER E-MAIL DE SUPORTE]",
-};
+export const legalIdentity = legalIdentityPlaceholder;
+export { LegalContact };
 
 export const legalPages = [
   ["Termos de Uso", "/termos", "Regras do serviço, contas e responsabilidades."],
@@ -33,7 +29,7 @@ export function legalMetadata(title: string, description: string, path: string):
 export function LegalPage({ eyebrow = "Centro de confiança", title, description, children, draft = true, breadcrumbParent = true }: { eyebrow?: string; title: string; description: string; children: React.ReactNode; draft?: boolean; breadcrumbParent?: boolean }) {
   const isLegalHub=title==="Centro jurídico e de confiança";
   const crumbs=isLegalHub||!breadcrumbParent?[{label:"Início",href:"/"},{label:title}]:[{label:"Início",href:"/"},{label:"Centro jurídico",href:"/legal"},{label:title}];
-  return <div className="legal-surface min-h-screen bg-[#f8faf7]"><PublicHeader/><main><section className="legal-hero border-b border-[#e1e9e4] bg-[#edf6f1] px-4 py-14 sm:px-6 lg:py-20"><div className="mx-auto max-w-5xl"><Breadcrumbs items={crumbs} className="mb-7"/><p className="section-eyebrow">{eyebrow}</p><h1 className="max-w-4xl text-4xl font-black tracking-[-.045em] text-[#173f37] sm:text-6xl">{title}</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-[#60716b]">{description}</p><p className="mt-5 text-xs font-bold uppercase tracking-[.1em] text-[#76857f]">Última atualização: 22 de agosto de 2026</p></div></section><div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_220px] lg:py-16"><article className="legal-copy min-w-0">{draft&&<DraftNotice/>}{children}</article><aside className="order-first lg:order-last"><div className="legal-toc sticky top-24 rounded-2xl border border-[#e1e9e4] bg-white p-5"><p className="text-xs font-black uppercase tracking-[.12em] text-[#2f7d70]">Documentos</p>{legalPages.map(([label,href])=><Link key={href} href={href}>{label}</Link>)}</div></aside></div></main><PublicFooter/></div>;
+  return <div className="legal-surface min-h-screen bg-[#f8faf7]"><PublicHeader/><main><section className="legal-hero border-b border-[#e1e9e4] bg-[#edf6f1] px-4 py-14 sm:px-6 lg:py-20"><div className="mx-auto max-w-5xl"><Breadcrumbs items={crumbs} className="mb-7"/><p className="section-eyebrow">{eyebrow}</p><h1 className="max-w-4xl text-4xl font-black tracking-[-.045em] text-[#173f37] sm:text-6xl">{title}</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-[#60716b]">{description}</p><p className="mt-5 text-xs font-bold uppercase tracking-[.1em] text-[#76857f]">Última atualização: 22 de agosto de 2026</p></div></section><div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_220px] lg:py-16"><article className="legal-copy min-w-0">{draft&&<LegalIdentityNotice/>}{children}</article><aside className="order-first lg:order-last"><div className="legal-toc sticky top-24 rounded-2xl border border-[#e1e9e4] bg-white p-5"><p className="text-xs font-black uppercase tracking-[.12em] text-[#2f7d70]">Documentos</p>{legalPages.map(([label,href])=><Link key={href} href={href}>{label}</Link>)}</div></aside></div></main><PublicFooter/></div>;
 }
 
 export function DraftNotice() {
@@ -41,5 +37,5 @@ export function DraftNotice() {
 }
 
 export function CompanyIdentification() {
-  return <><h2>Identificação do fornecedor</h2><ul><li>Nome empresarial ou responsável: <strong>{legalIdentity.legalName}</strong></li><li>CNPJ ou CPF: <strong>{legalIdentity.document}</strong></li><li>Endereço: <strong>{legalIdentity.address}</strong></li><li>Suporte: <strong>{legalIdentity.supportEmail}</strong></li><li>Privacidade e proteção de dados: <strong>{legalIdentity.privacyEmail}</strong></li></ul></>;
+  return <LegalCompanyIdentification/>;
 }

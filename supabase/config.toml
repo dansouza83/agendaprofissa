@@ -393,6 +393,9 @@ verify_jwt = false
 [functions.agenda-public-pricing]
 verify_jwt = false
 
+[functions.agenda-public-legal-identity]
+verify_jwt = false
+
 [functions.agenda-developer-users]
 verify_jwt = true
 

@@ -16,6 +16,16 @@ type CredentialRow = {
   updated_at: string;
 };
 
+type LegalIdentityRow = {
+  legal_name: string;
+  document: string;
+  address: string;
+  support_email: string;
+  privacy_email: string;
+  updated_at: string;
+  configured: boolean;
+};
+
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const service = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -143,6 +153,43 @@ const credentialSummary = (item: CredentialRow) => ({
   updatedAt: item.updated_at,
 });
 
+const legalIdentitySummary = (item?: LegalIdentityRow) => ({
+  legalName: item?.legal_name || "",
+  document: item?.document || "",
+  address: item?.address || "",
+  supportEmail: item?.support_email || "",
+  privacyEmail: item?.privacy_email || "",
+  updatedAt: item?.updated_at || "",
+  configured: Boolean(item?.configured),
+});
+
+async function legalIdentity() {
+  const { data, error } = await service.rpc("admin_get_legal_identity");
+  if (error) throw error;
+  return legalIdentitySummary(data?.[0] as LegalIdentityRow | undefined);
+}
+
+function requiredLegalText(value: unknown, label: string, limit: number) {
+  const text = String(value || "").trim();
+  if (!text) throw new Error(`Preencha ${label}.`);
+  if (text.length > limit) throw new Error(`${label} excede o limite permitido.`);
+  return text;
+}
+
+function legalIdentityInput(input: Record<string, unknown>) {
+  const supportEmail = requiredLegalText(input.supportEmail, "o e-mail de suporte", 254).toLowerCase();
+  const privacyEmail = requiredLegalText(input.privacyEmail, "o e-mail de privacidade", 254).toLowerCase();
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(supportEmail) || !emailPattern.test(privacyEmail)) throw new Error("Informe e-mails válidos para suporte e privacidade.");
+  return {
+    legalName: requiredLegalText(input.legalName, "o nome empresarial ou responsável", 160),
+    document: requiredLegalText(input.document, "o CNPJ ou CPF", 32),
+    address: requiredLegalText(input.address, "o endereço comercial", 500),
+    supportEmail,
+    privacyEmail,
+  };
+}
+
 async function syncPlan(token: string, id: string, reason: string, amount: number, frequency: number, backUrl: string) {
   const body = JSON.stringify({ reason, auto_recurring: { frequency, frequency_type: "months", transaction_amount: amount, currency_id: "BRL" }, back_url: backUrl });
   return id
@@ -230,6 +277,26 @@ Deno.serve(async (request) => {
     }
 
     if (user.email?.toLowerCase() !== "dansouzafloripa@gmail.com") return json({ error: "Acesso permitido somente ao desenvolvedor autorizado." }, 403);
+
+    if (action === "developerLegalIdentity") {
+      return json(await legalIdentity());
+    }
+
+    if (action === "saveLegalIdentity") {
+      const identity = legalIdentityInput(input);
+      const { error } = await service.rpc("admin_save_legal_identity", {
+        next_legal_name: identity.legalName,
+        next_document: identity.document,
+        next_address: identity.address,
+        next_support_email: identity.supportEmail,
+        next_privacy_email: identity.privacyEmail,
+        administrator_email: user.email,
+      });
+      if (error) throw error;
+      const savedIdentity = await legalIdentity();
+      if (!savedIdentity.configured) return json({ error: "Os dados não puderam ser confirmados após a gravação." }, 500);
+      return json({ saved: true, identity: savedIdentity });
+    }
 
     if (action === "developerCredentials") {
       const [test, production, active] = await Promise.all([credentials("test"), credentials("production"), credentials()]);

@@ -201,3 +201,33 @@ test("mantém a administração de usuários restrita ao desenvolvedor", async (
   assert.match(functionSource, /proprietário de um negócio/);
   assert.match(configSource, /\[functions\.agenda-developer-users\]\s+verify_jwt = true/);
 });
+
+test("recupera a senha do desenvolvedor somente por link enviado ao e-mail autorizado", async () => {
+  const developerSource = await readFile(new URL("../app/desenvolvedor/client.tsx", import.meta.url), "utf8");
+  const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
+  assert.match(developerSource, /sendDeveloperPasswordRecovery/);
+  assert.match(developerSource, /Receber link para criar nova senha/);
+  assert.match(developerSource, /A senha atual nunca é enviada nem exibida/);
+  assert.match(authSource, /developerEmail = "dansouzafloripa@gmail\.com"/);
+  assert.match(authSource, /sendDeveloperPasswordRecovery[\s\S]*sendPasswordRecovery\(developerEmail\)/);
+  assert.match(authSource, /resetPasswordForEmail\(email, \{ redirectTo:/);
+});
+
+test("guarda a identificação do fornecedor em área interna e publica somente os dados legais", async () => {
+  const developerSource = await readFile(new URL("../app/desenvolvedor/client.tsx", import.meta.url), "utf8");
+  const migrationSource = await readFile(new URL("../supabase/migrations/20260824163934_add_platform_legal_identity.sql", import.meta.url), "utf8");
+  const billingSource = await readFile(new URL("../supabase/functions/agenda-billing/index.ts", import.meta.url), "utf8");
+  const publicFunction = await readFile(new URL("../supabase/functions/agenda-public-legal-identity/index.ts", import.meta.url), "utf8");
+  const configSource = await readFile(new URL("../supabase/config.toml", import.meta.url), "utf8");
+  assert.match(developerSource, /Identificação do fornecedor/);
+  assert.match(developerSource, /api\("\/api\/developer\/legal-identity"/);
+  assert.match(migrationSource, /private\.platform_legal_identity/);
+  assert.match(migrationSource, /enable row level security/);
+  assert.match(migrationSource, /revoke all on table private\.platform_legal_identity from public, anon, authenticated/);
+  assert.match(migrationSource, /grant execute on function public\.admin_save_legal_identity[\s\S]*to service_role/);
+  assert.match(billingSource, /user\.email\?\.toLowerCase\(\) !== "dansouzafloripa@gmail\.com"/);
+  assert.match(billingSource, /action === "saveLegalIdentity"/);
+  assert.match(publicFunction, /admin_get_legal_identity/);
+  assert.doesNotMatch(publicFunction, /access_token|client_secret|webhook_secret/i);
+  assert.match(configSource, /\[functions\.agenda-public-legal-identity\]\s+verify_jwt = false/);
+});

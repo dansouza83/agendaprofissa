@@ -32,6 +32,27 @@ export async function edgeJson(request: Request, functionName: string, payload: 
   });
 }
 
+export async function publicEdgeJson(functionName: string, payload: Record<string, unknown>) {
+  const env = configured();
+  const response = await fetch(`${env.supabaseUrl}/functions/v1/${functionName}`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      apikey: env.publishableKey,
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+    },
+    body: JSON.stringify(payload),
+  });
+  return new Response(await response.text(), {
+    status: response.status,
+    headers: {
+      "Content-Type": response.headers.get("content-type") || "application/json",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 export async function edgeWebhook(request: Request) {
   const env = configured();
   const response = await fetch(`${env.supabaseUrl}/functions/v1/agenda-mp-webhook${new URL(request.url).search}`, {

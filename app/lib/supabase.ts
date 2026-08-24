@@ -2,6 +2,7 @@ import { createClient, type AuthChangeEvent, type SupabaseClient, type User } fr
 import type { Appointment, Client, Identity, Service, WorkspaceData } from "../domain";
 
 export type AccountType = "professional" | "client";
+export const developerEmail = "dansouzafloripa@gmail.com";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
@@ -98,6 +99,10 @@ export async function sendPasswordRecovery(email: string) {
   const baseUrl = window.location.origin.replace(/\/$/, "");
   const { error } = await client().auth.resetPasswordForEmail(email, { redirectTo: `${baseUrl}/sistema?recuperar-senha=1` });
   if (error) throw error;
+}
+
+export async function sendDeveloperPasswordRecovery() {
+  await sendPasswordRecovery(developerEmail);
 }
 
 export async function updateRecoveredPassword(password: string) {
