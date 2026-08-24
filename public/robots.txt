@@ -1,0 +1,8 @@
+# Agenda Profissa: páginas públicas permitidas para indexação.
+User-agent: *
+Allow: /
+Disallow: /sistema
+Disallow: /desenvolvedor
+Disallow: /api/
+
+Sitemap: https://agendaprofissa.netlify.app/sitemap.xml

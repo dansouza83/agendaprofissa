@@ -4,8 +4,8 @@ import { PublicFooter, PublicHeader } from "./public-shell";
 import { PublicPricing } from "./public-pricing";
 
 export const metadata: Metadata = {
-  title: "Agenda Profissa — Agendamentos simples para quem cuida de pessoas",
-  description: "Organize agenda, clientes e serviços em um sistema seguro, simples e pronto para usar no computador ou celular.",
+  title: "Agenda Profissa — Sistema de agendamento para profissionais",
+  description: "Software de agendamento para esteticistas, salões, personal trainers e profissionais autônomos. Organize agenda, clientes e serviços pelo celular.",
   alternates: { canonical: "/" },
 };
 
