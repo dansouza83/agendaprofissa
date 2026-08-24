@@ -1,3 +1,6 @@
+packages:
+  - .
+
 allowBuilds:
   esbuild: true
   netlify-cli: set this to true or false
