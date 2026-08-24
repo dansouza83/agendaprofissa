@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" role="img" aria-labelledby="title">
+  <title id="title">Agenda Profissa</title>
+  <rect x="20" y="30" width="260" height="260" rx="54" fill="#F6FFFA"/>
+  <image href="./agenda-profissa-symbol.png" x="37" y="47" width="226" height="226" preserveAspectRatio="xMidYMid meet"/>
+  <text x="320" y="188" fill="#F2FBF7" font-family="Arial Rounded MT Bold, Nunito, Arial, sans-serif" font-size="108" font-weight="800" letter-spacing="-3">Agenda Profissa</text>
+</svg>

@@ -10,7 +10,7 @@ const mainNavigation = [
 ] as const;
 
 export function Logo({ inverse = false }: { inverse?: boolean }) {
-  return <Link href="/" aria-label="Agenda Profissa — página inicial" className="flex min-w-0 items-center gap-3"><span className={`grid h-10 w-10 flex-none place-items-center rounded-xl text-xl ${inverse ? "bg-white text-[#2f7d70]" : "bg-[#2f7d70] text-white"}`}>✦</span><span className="min-w-0"><b className={`block text-lg leading-none ${inverse ? "text-white" : "text-[#173f37]"}`}>Agenda Profissa</b><small className={`hidden sm:block ${inverse ? "text-[#a9c8bf]" : "text-[#596b65]"}`}>Seu negócio organizado</small></span></Link>;
+  return <Link href="/" aria-label="Agenda Profissa — página inicial" className="flex min-w-0 items-center gap-2.5 sm:gap-3"><span className={`brand-symbol-tile grid h-10 w-10 flex-none place-items-center overflow-hidden rounded-xl p-1 shadow-sm ${inverse ? "brand-symbol-inverse bg-transparent shadow-none" : "bg-[#eaf7f2]"}`}><img src="/brand/agenda-profissa-symbol.png" alt="" aria-hidden="true" className={`h-full w-full object-contain ${inverse ? "brand-symbol-white" : "brand-symbol-adaptive"}`} /></span><span className="min-w-0"><b className={`block text-lg leading-none ${inverse ? "text-white" : "text-[#173f37]"}`}>Agenda Profissa</b><small className={`hidden sm:block ${inverse ? "text-[#b7d5ca]" : "text-[#52675f]"}`}>Seu negócio organizado</small></span></Link>;
 }
 
 export function PublicHeader() {

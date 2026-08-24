@@ -221,7 +221,7 @@ function DashboardPreview() {
       <div className="preview-window">
         <div className="preview-top"><div className="flex gap-1.5"><i /><i /><i /></div><span>app.agendaprofissa.com.br</span><b>•••</b></div>
         <div className="grid min-h-[420px] min-w-0 grid-cols-[72px_minmax(0,1fr)] sm:grid-cols-[150px_minmax(0,1fr)]">
-          <aside className="preview-side"><div className="preview-logo">✦</div>{["⌂ Início","▦ Agenda","♙ Clientes","◇ Serviços"].map((item,index)=><div key={item} className={index===0?"active":""}>{item}</div>)}</aside>
+          <aside className="preview-side"><div className="preview-logo"><img src="/brand/agenda-profissa-symbol.png" alt="" aria-hidden="true" className="h-full w-full object-contain p-1" /></div>{["⌂ Início","▦ Agenda","♙ Clientes","◇ Serviços"].map((item,index)=><div key={item} className={index===0?"active":""}>{item}</div>)}</aside>
           <div className="min-w-0 bg-[#f7f9f6] p-4 sm:p-6">
             <div className="flex items-center justify-between"><div><small>SEGUNDA, 17 DE AGOSTO</small><h3>Bom dia, Marina.</h3></div><span className="preview-avatar">MC</span></div>
             <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3"><PreviewStat value="5" label="Hoje"/><PreviewStat value="24" label="Clientes"/><div className="hidden sm:block"><PreviewStat value="R$ 540" label="Previsto"/></div></div>
