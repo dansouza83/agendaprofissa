@@ -108,14 +108,15 @@ export function getRememberAccess() {
   return localStorage.getItem(rememberKey) !== "false";
 }
 
-export async function sendPasswordRecovery(email: string) {
+export async function sendPasswordRecovery(email: string, redirectPath = "/sistema?recuperar-senha=1") {
   const baseUrl = window.location.origin.replace(/\/$/, "");
-  const { error } = await client().auth.resetPasswordForEmail(email, { redirectTo: `${baseUrl}/sistema?recuperar-senha=1` });
+  const safePath = redirectPath.startsWith("/") ? redirectPath : `/${redirectPath}`;
+  const { error } = await client().auth.resetPasswordForEmail(email, { redirectTo: `${baseUrl}${safePath}` });
   if (error) throw error;
 }
 
 export async function sendDeveloperPasswordRecovery() {
-  await sendPasswordRecovery(developerEmail);
+  await sendPasswordRecovery(developerEmail, "/desenvolvedor?recuperar-senha=1");
 }
 
 export async function updateRecoveredPassword(password: string) {

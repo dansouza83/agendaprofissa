@@ -222,8 +222,11 @@ test("recupera a senha do desenvolvedor somente por link enviado ao e-mail autor
   assert.match(developerSource, /Receber link para criar nova senha/);
   assert.match(developerSource, /A senha atual nunca é enviada nem exibida/);
   assert.match(authSource, /developerEmail = "dansouzafloripa@gmail\.com"/);
-  assert.match(authSource, /sendDeveloperPasswordRecovery[\s\S]*sendPasswordRecovery\(developerEmail\)/);
+  assert.match(authSource, /sendDeveloperPasswordRecovery[\s\S]*sendPasswordRecovery\(developerEmail, "\/desenvolvedor\?recuperar-senha=1"\)/);
   assert.match(authSource, /resetPasswordForEmail\(email, \{ redirectTo:/);
+  assert.match(developerSource, /onOnlineAuthChange/);
+  assert.match(developerSource, /PASSWORD_RECOVERY/);
+  assert.match(developerSource, /Recuperação segura/);
 });
 
 test("guarda a identificação do fornecedor em área interna e publica somente os dados legais", async () => {

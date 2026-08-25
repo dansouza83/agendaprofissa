@@ -4,7 +4,7 @@ import "./landing.css";
 import { PwaRegistration } from "./pwa";
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-const productionSiteUrl = "https://agendaprofissa.netlify.app";
+const productionSiteUrl = "https://agendaprofissa.profissaonline.workers.dev";
 const metadataSiteUrl = (() => {
   if (!configuredSiteUrl || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredSiteUrl)) return productionSiteUrl;
   try {
