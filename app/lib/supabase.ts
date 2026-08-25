@@ -13,9 +13,22 @@ export const captchaProtectionConfigured = Boolean(turnstileSiteKey);
 let singleton: SupabaseClient | null = null;
 const rememberKey = "agenda-facil-remember-access";
 
+function isLocalHostname(hostname: string) {
+  return ["localhost", "127.0.0.1", "::1"].includes(hostname);
+}
+
+/**
+ * Demonstration data is useful while developing locally, but it must never
+ * become a public fallback when a production deployment is missing config.
+ */
+export function localDemoModeEnabled() {
+  if (supabaseConfigured || typeof window === "undefined") return false;
+  return isLocalHostname(window.location.hostname);
+}
+
 function localSignupBypassAllowed() {
   if (!allowLocalSignupWithoutCaptcha || typeof window === "undefined") return false;
-  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+  return isLocalHostname(window.location.hostname);
 }
 
 /** CAPTCHA stays mandatory for every published address. The bypass is limited to an explicit local test build. */

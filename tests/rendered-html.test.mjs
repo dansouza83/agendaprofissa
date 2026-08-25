@@ -179,6 +179,16 @@ test("protege o cadastro online contra automação", async () => {
   assert.match(configSource, /provider = "turnstile"/);
 });
 
+test("restringe contas e dados de demonstração ao ambiente local", async () => {
+  const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
+  const systemSource = await readFile(new URL("../app/sistema/client.tsx", import.meta.url), "utf8");
+  assert.match(authSource, /export function localDemoModeEnabled/);
+  assert.match(authSource, /if \(supabaseConfigured \|\| typeof window === "undefined"\) return false/);
+  assert.match(authSource, /return isLocalHostname\(window\.location\.hostname\)/);
+  assert.match(systemSource, /else if\(localDemoModeEnabled\(\)\)/);
+  assert.match(systemSource, /if\(!localDemoModeEnabled\(\)\)throw new Error\("O acesso online está em configuração\. Contas de demonstração não são disponibilizadas neste endereço\."\)/);
+});
+
 test("mantém a administração de usuários restrita ao desenvolvedor", async () => {
   const developerSource = await readFile(new URL("../app/desenvolvedor/client.tsx", import.meta.url), "utf8");
   const usersPageSource = await readFile(new URL("../app/desenvolvedor/usuarios/page.tsx", import.meta.url), "utf8");
