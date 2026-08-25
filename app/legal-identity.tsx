@@ -42,7 +42,7 @@ function useLegalIdentity() {
 
 export function ProfessionalSupportLink() {
   const href = `mailto:${professionalSupportEmail}?subject=${encodeURIComponent("Suporte — Agenda Profissa")}`;
-  return <a className="flex min-h-11 items-center justify-between gap-3 rounded-xl bg-[#e8f6ef] p-4 text-sm text-[#24685d]" href={href}><span><strong className="block font-extrabold">Falar com o suporte</strong><span className="mt-1 block break-all text-xs">{professionalSupportEmail}</span></span><span aria-hidden="true">↗</span></a>;
+  return <a className="professional-support-card flex min-h-11 items-center justify-between gap-3 rounded-xl border border-[#b9ddd2] bg-[#e8f6ef] p-4 text-sm text-[#16483d]" href={href}><span><strong className="professional-support-title block font-extrabold">Falar com o suporte</strong><span className="mt-1 block break-all text-xs">{professionalSupportEmail}</span></span><span aria-hidden="true">↗</span></a>;
 }
 
 export function LegalContact({ field }: { field: "privacyEmail" | "supportEmail" }) {

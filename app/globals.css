@@ -21,6 +21,18 @@
 .dark .system-theme .breadcrumbs a,.dark .system-theme .breadcrumbs button{color:#83cfba}.dark .system-theme .breadcrumbs [aria-current="page"],.dark .system-theme .breadcrumbs .breadcrumb-separator{color:#91a79f}
 .dark .system-theme .system-side-nav-active{background:#fff;color:#16483d}.dark .system-theme .system-side-nav-active:hover{background:#fff;color:#103a31}
 
+/* Painel profissional: contraste WCAG AA e estados de navegação consistentes. */
+.professional-workspace button:focus-visible,.professional-workspace a:focus-visible,.professional-workspace summary:focus-visible{outline:3px solid #2f7d70;outline-offset:2px}
+.professional-workspace .professional-support-title{color:#16483d}
+.professional-workspace .message-notification-badge{background:#b54134;color:#fff}
+.dark .professional-workspace .chat-conversation-surface{background:#0a1814}
+.dark .professional-workspace .chat-message-meta-mine{color:#fff}
+.dark .professional-workspace .professional-payment-card,.dark .professional-workspace .professional-support-card{border-color:#8bbdaf;background:#e8f6ef;color:#16483d}
+.dark .professional-workspace .professional-support-title{color:#16483d}
+.dark .professional-workspace .system-mobile-nav-active{background:#fff;color:#16483d}
+.dark .professional-workspace .text-red-600{color:#f2a29c}
+.dark .professional-workspace button:focus-visible,.dark .professional-workspace a:focus-visible,.dark .professional-workspace summary:focus-visible{outline-color:#82ceb9}
+
 /* Contraste WCAG AA: textos auxiliares, estados e superfícies especiais. */
 html:not(.dark) .breadcrumbs a,html:not(.dark) .breadcrumbs button{color:#286c61}
 html:not(.dark) .system-theme .eyebrow{color:#52645e}

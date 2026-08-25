@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     images: [{ url: "/og.png", width: 1536, height: 1024, alt: "Agenda Profissa — Seu negócio organizado" }],
   },
   twitter: { card: "summary_large_image", title: "Agenda Profissa — Seu negócio organizado", description: "Agenda, clientes e serviços para profissionais autônomos.", images: ["/og.png"] },
-  icons: { icon: [{ url: "/brand/agenda-profissa-symbol.png", type: "image/png", sizes: "1254x1254" }], shortcut: [{ url: "/brand/agenda-profissa-symbol.png", type: "image/png", sizes: "1254x1254" }], apple: [{ url: "/brand/agenda-profissa-symbol.png", type: "image/png", sizes: "1254x1254" }] },
+  icons: { icon: "/brand/agenda-profissa-symbol.png", shortcut: "/brand/agenda-profissa-symbol.png", apple: "/brand/agenda-profissa-symbol.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
