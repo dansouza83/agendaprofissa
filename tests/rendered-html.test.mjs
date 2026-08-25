@@ -264,6 +264,7 @@ test("oferece suporte interno e chat multitenant com notificações", async () =
   const chatSource = await readFile(new URL("../app/sistema/chat-panel.tsx", import.meta.url), "utf8");
   const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
   const supportSource = await readFile(new URL("../app/legal-identity.tsx", import.meta.url), "utf8");
+  const publicShellSource = await readFile(new URL("../app/public-shell.tsx", import.meta.url), "utf8");
   const migrationSource = await readFile(new URL("../supabase/migrations/20260825142758_add_secure_chat_messages.sql", import.meta.url), "utf8");
   assert.match(systemSource, /mensagens:\["✉","Mensagens"\]/);
   assert.match(systemSource, /MessageNotification/);
@@ -273,6 +274,9 @@ test("oferece suporte interno e chat multitenant com notificações", async () =
   assert.match(authSource, /markOnlineMessagesRead/);
   assert.match(supportSource, /ProfessionalSupportLink/);
   assert.match(supportSource, /Falar com o suporte/);
+  assert.match(supportSource, /dansouzafloripa@gmail\.com/);
+  assert.doesNotMatch(supportSource, /Suporte em configuração/);
+  assert.doesNotMatch(publicShellSource, /dansouzafloripa@gmail\.com/);
   assert.match(migrationSource, /alter table public\.chat_messages enable row level security/);
   assert.match(migrationSource, /sender_user_id = \(select auth\.uid\(\)\)/);
   assert.match(migrationSource, /m\.tenant_id = chat_messages\.tenant_id[\s\S]*m\.user_id = \(select auth\.uid\(\)\)/);
