@@ -49,6 +49,14 @@ function requireSafePassword(password: string) {
   if (issue) throw new Error(issue);
 }
 
+function throwEmailDeliveryError(error: { code?: string; message?: string } | null) {
+  if (!error) return;
+  if (error.code === "over_email_send_rate_limit" || /email rate limit exceeded/i.test(error.message ?? "")) {
+    throw new Error("O limite temporário de envio de e-mails foi atingido. Aguarde até uma hora e tente novamente apenas uma vez.");
+  }
+  throw error;
+}
+
 const authStorage = {
   getItem(key: string) {
     const storage = localStorage.getItem(rememberKey) === "false" ? sessionStorage : localStorage;
@@ -92,7 +100,7 @@ export async function signInOnline(email: string, password: string) {
 
 export async function resendSignupConfirmation(email: string) {
   const { error } = await client().auth.resend({ type: "signup", email });
-  if (error) throw error;
+  throwEmailDeliveryError(error);
 }
 
 export async function currentAccessToken() {
@@ -112,7 +120,7 @@ export async function sendPasswordRecovery(email: string, redirectPath = "/siste
   const baseUrl = window.location.origin.replace(/\/$/, "");
   const safePath = redirectPath.startsWith("/") ? redirectPath : `/${redirectPath}`;
   const { error } = await client().auth.resetPasswordForEmail(email, { redirectTo: `${baseUrl}${safePath}` });
-  if (error) throw error;
+  throwEmailDeliveryError(error);
 }
 
 export async function sendDeveloperPasswordRecovery() {

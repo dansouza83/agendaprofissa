@@ -221,6 +221,8 @@ test("recupera a senha do desenvolvedor somente por link enviado ao e-mail autor
   assert.match(developerSource, /sendDeveloperPasswordRecovery/);
   assert.match(developerSource, /Receber link para criar nova senha/);
   assert.match(developerSource, /A senha atual nunca é enviada nem exibida/);
+  assert.match(developerSource, /O link é enviado somente para o e-mail do desenvolvedor/);
+  assert.match(authSource, /O limite temporário de envio de e-mails foi atingido/);
   assert.match(authSource, /developerEmail = "dansouzafloripa@gmail\.com"/);
   assert.match(authSource, /sendDeveloperPasswordRecovery[\s\S]*sendPasswordRecovery\(developerEmail, "\/desenvolvedor\?recuperar-senha=1"\)/);
   assert.match(authSource, /resetPasswordForEmail\(email, \{ redirectTo:/);
