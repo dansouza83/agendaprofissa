@@ -187,6 +187,7 @@ test("restringe contas e dados de demonstração ao ambiente local", async () =>
   assert.match(authSource, /return isLocalHostname\(window\.location\.hostname\)/);
   assert.match(systemSource, /else if\(localDemoModeEnabled\(\)\)/);
   assert.match(systemSource, /if\(!localDemoModeEnabled\(\)\)throw new Error\("O acesso online está em configuração\. Contas de demonstração não são disponibilizadas neste endereço\."\)/);
+  assert.doesNotMatch(systemSource, /demo123|@demo\.com|const users:Record/);
 });
 
 test("mantém a administração de usuários restrita ao desenvolvedor", async () => {
