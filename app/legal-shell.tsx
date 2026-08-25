@@ -19,8 +19,10 @@ export const legalPages = [
 ] as const;
 
 export function legalMetadata(title: string, description: string, path: string): Metadata {
+  const hiddenDraft = !["/faq", "/seguranca"].includes(path);
   return {
     title: `${title} — Agenda Profissa`, description, alternates: { canonical: path },
+    ...(hiddenDraft ? { robots: { index: false, follow: false } } : {}),
     openGraph: { title: `${title} — Agenda Profissa`, description, type: "article", locale: "pt_BR", images: [] },
     twitter: { card: "summary", title: `${title} — Agenda Profissa`, description, images: [] },
   };

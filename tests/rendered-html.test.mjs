@@ -78,6 +78,15 @@ test("mantém todas as páginas jurídicas acessíveis", async () => {
   }
 });
 
+test("mantém documentos jurídicos em preparação fora da navegação pública", async () => {
+  const footerSource = await readFile(new URL("../app/public-shell.tsx", import.meta.url), "utf8");
+  const landingSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const legalShellSource = await readFile(new URL("../app/legal-shell.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(footerSource.match(/export function PublicFooter[\s\S]*?\n}/)?.[0] ?? "", /Termos de uso|Privacidade|Cookies|Diretrizes|Direitos do titular/);
+  assert.doesNotMatch(landingSource, /Ler a privacidade|Seus direitos/);
+  assert.match(legalShellSource, /robots: \{ index: false, follow: false \}/);
+});
+
 test("explica proteção contra fraude e preserva direitos do consumidor", async () => {
   const termsSource = await readFile(new URL("../app/termos/page.tsx", import.meta.url), "utf8");
   const antiFraudSource = await readFile(new URL("../app/antifraude/page.tsx", import.meta.url), "utf8");
@@ -248,4 +257,25 @@ test("guarda a identificação do fornecedor em área interna e publica somente 
   assert.match(publicFunction, /admin_get_legal_identity/);
   assert.doesNotMatch(publicFunction, /access_token|client_secret|webhook_secret/i);
   assert.match(configSource, /\[functions\.agenda-public-legal-identity\]\s+verify_jwt = false/);
+});
+
+test("oferece suporte interno e chat multitenant com notificações", async () => {
+  const systemSource = await readFile(new URL("../app/sistema/client.tsx", import.meta.url), "utf8");
+  const chatSource = await readFile(new URL("../app/sistema/chat-panel.tsx", import.meta.url), "utf8");
+  const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
+  const supportSource = await readFile(new URL("../app/legal-identity.tsx", import.meta.url), "utf8");
+  const migrationSource = await readFile(new URL("../supabase/migrations/20260825142758_add_secure_chat_messages.sql", import.meta.url), "utf8");
+  assert.match(systemSource, /mensagens:\["✉","Mensagens"\]/);
+  assert.match(systemSource, /MessageNotification/);
+  assert.match(chatSource, /mensagem\(ns\) não lida\(s\)/);
+  assert.match(chatSource, /Conversa segura/);
+  assert.match(authSource, /sendOnlineMessage/);
+  assert.match(authSource, /markOnlineMessagesRead/);
+  assert.match(supportSource, /ProfessionalSupportLink/);
+  assert.match(supportSource, /Falar com o suporte/);
+  assert.match(migrationSource, /alter table public\.chat_messages enable row level security/);
+  assert.match(migrationSource, /sender_user_id = \(select auth\.uid\(\)\)/);
+  assert.match(migrationSource, /m\.tenant_id = chat_messages\.tenant_id[\s\S]*m\.user_id = \(select auth\.uid\(\)\)/);
+  assert.match(migrationSource, /grant update \(read_at\) on public\.chat_messages to authenticated/);
+  assert.doesNotMatch(migrationSource, /grant (all|delete)/i);
 });

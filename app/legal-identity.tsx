@@ -38,6 +38,14 @@ function useLegalIdentity() {
   return identity;
 }
 
+export function ProfessionalSupportLink() {
+  const identity = useLegalIdentity();
+  const available = identity.configured && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity.supportEmail);
+  if (!available) return <span className="block rounded-xl bg-[#f4f7f5] p-4 text-sm text-[#66736e]">Suporte em configuração.</span>;
+  const href = `mailto:${identity.supportEmail}?subject=${encodeURIComponent("Suporte — Agenda Profissa")}`;
+  return <a className="flex min-h-11 items-center justify-between rounded-xl bg-[#e8f6ef] p-4 text-sm font-extrabold text-[#24685d]" href={href}>Falar com o suporte <span aria-hidden="true">↗</span></a>;
+}
+
 export function LegalContact({ field }: { field: "privacyEmail" | "supportEmail" }) {
   const identity = useLegalIdentity();
   return <>{identity[field]}</>;

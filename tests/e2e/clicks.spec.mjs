@@ -324,7 +324,7 @@ test("ações de agenda, clientes e serviços abrem, salvam e cancelam corretame
   await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();
 });
 
-test("área do aluno abre links de privacidade e encerra a sessão", async ({ page }) => {
+test("área do aluno mantém documentos em preparação ocultos e encerra a sessão", async ({ page }) => {
   await page.goto("/sistema?cadastro=cliente");
   await page.getByLabel("Seu nome").fill("Aluno Teste");
   await page.getByLabel("E-mail").fill("aluno-e2e@example.com");
@@ -333,13 +333,9 @@ test("área do aluno abre links de privacidade e encerra a sessão", async ({ pa
   await page.getByRole("button", { name: "Criar perfil de aluno/cliente" }).click();
   await expect(page.getByText("Área pessoal")).toBeVisible();
 
-  await page.getByRole("link", { name: "Aviso de Privacidade" }).click();
-  await expectPath(page, "/privacidade");
-  await page.goBack();
-  await expect(page.getByText("Área pessoal")).toBeVisible();
-  await page.getByRole("link", { name: "Meus direitos" }).click();
-  await expectPath(page, "/direitos-do-titular");
-  await page.goBack();
+  await expect(page.getByRole("link", { name: "Aviso de Privacidade" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Meus direitos" })).toHaveCount(0);
+  await expect(page.getByText("Mensagens internas")).toBeVisible();
   await page.getByRole("button", { name: "Sair da conta" }).click();
   await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();
 });

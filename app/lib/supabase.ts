@@ -1,5 +1,5 @@
 import { createClient, type AuthChangeEvent, type SupabaseClient, type User } from "@supabase/supabase-js";
-import type { Appointment, Client, Identity, Service, WorkspaceData } from "../domain";
+import type { Appointment, ChatMessage, Client, Identity, Service, WorkspaceData } from "../domain";
 
 export type AccountType = "professional" | "client";
 export const developerEmail = "dansouzafloripa@gmail.com";
@@ -196,7 +196,7 @@ export async function loadOnlineWorkspace() {
   if (profileError) throw profileError;
   const name = profile?.full_name || userData.user.email?.split("@")[0] || "Usuário";
   if (profile?.account_type === "client") {
-    const { data: linkedClients, error: clientsError } = await api.from("clients").select("id, tenant_id, name, phone, email, notes").eq("user_id", userData.user.id).order("name");
+    const { data: linkedClients, error: clientsError } = await api.from("clients").select("id, tenant_id, user_id, name, phone, email, notes").eq("user_id", userData.user.id).order("name");
     if (clientsError) throw clientsError;
     const clientIds = (linkedClients ?? []).map((row) => row.id);
     const appointmentResult = clientIds.length ? await api.from("appointments").select("id, tenant_id, client_id, service_id, starts_at, status, notes").in("client_id", clientIds).order("starts_at") : { data: [], error: null };
@@ -205,13 +205,17 @@ export async function loadOnlineWorkspace() {
     const serviceResult = serviceIds.length ? await api.from("services").select("id, tenant_id, name, duration_minutes, price_cents, color, active").in("id", serviceIds) : { data: [], error: null };
     if (serviceResult.error) throw serviceResult.error;
     const tenantIds = [...new Set((linkedClients ?? []).map((row) => row.tenant_id))];
-    const tenantResult = tenantIds.length ? await api.from("tenants").select("id, timezone").in("id", tenantIds) : { data: [], error: null };
+    const tenantResult = tenantIds.length ? await api.from("tenants").select("id, name, timezone").in("id", tenantIds) : { data: [], error: null };
     if (tenantResult.error) throw tenantResult.error;
+    const messageResult = clientIds.length ? await api.from("chat_messages").select("id, tenant_id, client_id, sender_user_id, body, read_at, created_at").in("client_id", clientIds).order("created_at") : { data: [], error: null };
+    if (messageResult.error) throw messageResult.error;
     const zones = new Map((tenantResult.data ?? []).map((row) => [row.id, row.timezone]));
+    const businessNames = new Map((tenantResult.data ?? []).map((row) => [row.id, row.name]));
     const data: WorkspaceData = {
-      clients: (linkedClients ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, name: row.name, phone: row.phone, email: row.email, notes: row.notes })),
+      clients: (linkedClients ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, userId: row.user_id ?? undefined, businessName: businessNames.get(row.tenant_id), name: row.name, phone: row.phone, email: row.email, notes: row.notes })),
       services: (serviceResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, name: row.name, duration: row.duration_minutes, price: row.price_cents / 100, color: row.color, active: row.active })),
       appointments: (appointmentResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, clientId: row.client_id, serviceId: row.service_id, ...localParts(row.starts_at, zones.get(row.tenant_id) ?? "America/Sao_Paulo"), status: row.status, notes: row.notes } as Appointment)),
+      messages: (messageResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, clientId: row.client_id, senderUserId: row.sender_user_id, body: row.body, readAt: row.read_at, createdAt: row.created_at, mine: row.sender_user_id === userData.user.id } as ChatMessage)),
     };
     return { tenantId: `client-${userData.user.id}`, identity: { name, business: "Área do aluno/cliente", email: userData.user.email ?? "", initials: initials(name), role: "client" } satisfies Identity, data };
   }
@@ -219,20 +223,41 @@ export async function loadOnlineWorkspace() {
   if (membershipError) throw membershipError;
   if (!membership) throw new Error("Seu usuário ainda não está vinculado a um negócio.");
   const tenantId = membership.tenant_id as string;
-  const [tenantResult, clientsResult, servicesResult, appointmentsResult] = await Promise.all([
+  const [tenantResult, clientsResult, servicesResult, appointmentsResult, messagesResult] = await Promise.all([
     api.from("tenants").select("id, name, timezone").eq("id", tenantId).single(),
-    api.from("clients").select("id, tenant_id, name, phone, email, notes").eq("tenant_id", tenantId).order("name"),
+    api.from("clients").select("id, tenant_id, user_id, name, phone, email, notes").eq("tenant_id", tenantId).order("name"),
     api.from("services").select("id, tenant_id, name, duration_minutes, price_cents, color, active").eq("tenant_id", tenantId).order("name"),
     api.from("appointments").select("id, tenant_id, client_id, service_id, starts_at, status, notes").eq("tenant_id", tenantId).order("starts_at"),
+    api.from("chat_messages").select("id, tenant_id, client_id, sender_user_id, body, read_at, created_at").eq("tenant_id", tenantId).order("created_at"),
   ]);
-  const error = tenantResult.error || clientsResult.error || servicesResult.error || appointmentsResult.error;
+  const error = tenantResult.error || clientsResult.error || servicesResult.error || appointmentsResult.error || messagesResult.error;
   if (error) throw error;
   const tenant = tenantResult.data;
   const identity: Identity = { name, business: tenant.name, email: userData.user.email ?? "", initials: initials(name), role: membership.role };
-  const clients: Client[] = (clientsResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, name: row.name, phone: row.phone, email: row.email, notes: row.notes }));
+  const clients: Client[] = (clientsResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, userId: row.user_id ?? undefined, name: row.name, phone: row.phone, email: row.email, notes: row.notes }));
   const services: Service[] = (servicesResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, name: row.name, duration: row.duration_minutes, price: row.price_cents / 100, color: row.color, active: row.active }));
   const appointments: Appointment[] = (appointmentsResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, clientId: row.client_id, serviceId: row.service_id, ...localParts(row.starts_at, tenant.timezone), status: row.status, notes: row.notes } as Appointment));
-  return { tenantId, identity, data: { clients, services, appointments } satisfies WorkspaceData };
+  const messages: ChatMessage[] = (messagesResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, clientId: row.client_id, senderUserId: row.sender_user_id, body: row.body, readAt: row.read_at, createdAt: row.created_at, mine: row.sender_user_id === userData.user.id }));
+  return { tenantId, identity, data: { clients, services, appointments, messages } satisfies WorkspaceData };
+}
+
+export async function sendOnlineMessage(tenantId: string, clientId: string, body: string) {
+  const api = client();
+  const { data: userData, error: userError } = await api.auth.getUser();
+  if (userError || !userData.user) throw userError ?? new Error("Sessão não encontrada.");
+  const cleanBody = body.trim();
+  if (!cleanBody || cleanBody.length > 2000) throw new Error("A mensagem deve ter entre 1 e 2.000 caracteres.");
+  const { data, error } = await api.from("chat_messages").insert({ tenant_id: tenantId, client_id: clientId, sender_user_id: userData.user.id, body: cleanBody }).select("id, tenant_id, client_id, sender_user_id, body, read_at, created_at").single();
+  if (error) throw error;
+  return { id: data.id, tenantId: data.tenant_id, clientId: data.client_id, senderUserId: data.sender_user_id, body: data.body, readAt: data.read_at, createdAt: data.created_at, mine: true } satisfies ChatMessage;
+}
+
+export async function markOnlineMessagesRead(tenantId: string, clientId: string) {
+  const api = client();
+  const { data: userData, error: userError } = await api.auth.getUser();
+  if (userError || !userData.user) throw userError ?? new Error("Sessão não encontrada.");
+  const { error } = await api.from("chat_messages").update({ read_at: new Date().toISOString() }).eq("tenant_id", tenantId).eq("client_id", clientId).neq("sender_user_id", userData.user.id).is("read_at", null);
+  if (error) throw error;
 }
 
 export async function saveOnlineClient(record: Client, exists: boolean) {
