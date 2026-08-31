@@ -31,6 +31,10 @@ test("painel profissional mantém contraste nos temas escuro e claro", async ({ 
     if ((await page.locator("html").getAttribute("class"))?.includes("dark") !== dark) {
       await page.getByRole("button", { name: "Alternar entre tema claro e escuro" }).click();
     }
+    if (testInfo.project.name === "desktop") {
+      await navigation.getByRole("button", { name: /Agenda$/ }).hover();
+      await expectProfessionalContrast(page, `desktop / ${dark ? "escuro" : "claro"} / hover do menu lateral`);
+    }
     for (const destination of destinations) {
       await navigation.getByRole("button", { name: new RegExp(`${destination}$`) }).click();
       await expectProfessionalContrast(page, `${testInfo.project.name} / ${dark ? "escuro" : "claro"} / ${destination}`);

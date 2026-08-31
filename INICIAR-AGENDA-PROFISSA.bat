@@ -3,7 +3,7 @@ title Agenda Profissa - Servidor Local
 cd /d "%~dp0"
 
 set "AGENDA_NODE=%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe"
-set "AGENDA_CLI=%~dp0node_modules\.pnpm\vinext@1.0.0-beta.2_@vitejs_93f6fd6c708956198cb05a5cfe3fd3ab\node_modules\vinext\dist\cli.js"
+set "AGENDA_CLI=%~dp0node_modules\vinext\dist\cli.js"
 
 if not exist "%AGENDA_NODE%" (
   echo Nao foi possivel encontrar o Node.js instalado.

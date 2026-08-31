@@ -11,7 +11,7 @@ export function unreadMessages(messages: ChatMessage[]) {
 }
 
 export function MessageNotification({ count, onClick }: { count: number; onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="relative grid h-11 w-11 place-items-center rounded-xl border border-[#dce6e1] bg-white text-lg text-[#2f7d70]" aria-label={count ? `${count} mensagem(ns) não lida(s)` : "Abrir mensagens"} title="Mensagens"><span aria-hidden="true">✉</span>{count > 0 && <span className="message-notification-badge absolute -right-1 -top-1 min-w-5 rounded-full bg-[#b54134] px-1.5 py-0.5 text-center text-[10px] font-black leading-4 text-white">{count > 99 ? "99+" : count}</span>}</button>;
+  return <button type="button" onClick={onClick} className="relative grid h-11 w-11 place-items-center rounded-xl border border-[#dce6e1] bg-white text-lg text-[#2f7d70]" aria-label={count ? `${count} alerta(s) ou mensagem(ns) não lida(s)` : "Abrir alertas e mensagens"} title="Alertas e mensagens"><span aria-hidden="true">✉</span>{count > 0 && <span className="message-notification-badge absolute -right-1 -top-1 min-w-5 rounded-full bg-[#b54134] px-1.5 py-0.5 text-center text-[10px] font-black leading-4 text-white">{count > 99 ? "99+" : count}</span>}</button>;
 }
 
 export function ChatPanel({ data, messages, setMessages, online, audience }: { data: WorkspaceData; messages: ChatMessage[]; setMessages: (messages: ChatMessage[]) => void; online: boolean; audience: ChatAudience }) {

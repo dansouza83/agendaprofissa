@@ -283,3 +283,35 @@ test("oferece suporte interno e chat multitenant com notificações", async () =
   assert.match(migrationSource, /grant update \(read_at\) on public\.chat_messages to authenticated/);
   assert.doesNotMatch(migrationSource, /grant (all|delete)/i);
 });
+
+test("automatiza alertas de agendamento e confirmação manual de pagamento", async () => {
+  const systemSource = await readFile(new URL("../app/sistema/client.tsx", import.meta.url), "utf8");
+  const alertsSource = await readFile(new URL("../app/sistema/appointment-alerts.tsx", import.meta.url), "utf8");
+  const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
+  const migrationSource = await readFile(new URL("../supabase/migrations/20260827135758_add_appointment_payment_notifications.sql", import.meta.url), "utf8");
+  assert.match(systemSource, /Confirmar pagamento/);
+  assert.match(systemSource, /Pagamento confirmado e cliente notificado/);
+  assert.match(alertsSource, /Alertas de agendamentos/);
+  assert.match(authSource, /confirmOnlineAppointmentPayment/);
+  assert.match(authSource, /markOnlineNotificationRead/);
+  assert.match(migrationSource, /create table public\.appointment_notifications/);
+  assert.match(migrationSource, /alter table public\.appointment_notifications enable row level security/);
+  assert.match(migrationSource, /recipient_user_id = \(select auth\.uid\(\)\)/);
+  assert.match(migrationSource, /create trigger create_appointment_notifications/);
+  assert.match(migrationSource, /Novo agendamento — pagamento pendente/);
+  assert.match(migrationSource, /Pagamento confirmado — horário reservado/);
+  assert.doesNotMatch(migrationSource, /grant insert on public\.appointment_notifications to authenticated/i);
+});
+
+test("destaca o WhatsApp na landing e prepara mensagens contextuais na agenda", async () => {
+  const landingSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const systemSource = await readFile(new URL("../app/sistema/client.tsx", import.meta.url), "utf8");
+  const whatsappSource = await readFile(new URL("../app/lib/whatsapp.ts", import.meta.url), "utf8");
+  assert.match(landingSource, /Mensagens pelo WhatsApp/);
+  assert.match(landingSource, /Menos erros nos horários/);
+  assert.match(landingSource, /só é enviada depois da sua confirmação no WhatsApp/);
+  assert.match(systemSource, /Enviar atualização no WhatsApp/);
+  assert.match(whatsappSource, /https:\/\/wa\.me\//);
+  assert.match(whatsappSource, /paymentStatus === "paid"/);
+  assert.match(whatsappSource, /O pagamento ainda está pendente de confirmação/);
+});

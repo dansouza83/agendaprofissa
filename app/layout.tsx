@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@fontsource-variable/manrope/wght.css";
 import "./globals.css";
 import "./landing.css";
 import { PwaRegistration } from "./pwa";
@@ -80,7 +81,7 @@ export const metadata: Metadata = {
     images: [{ url: "/og.png", width: 1536, height: 1024, alt: "Agenda Profissa — Seu negócio organizado" }],
   },
   twitter: { card: "summary_large_image", title: "Agenda Profissa — Seu negócio organizado", description: "Agenda, clientes e serviços para profissionais autônomos.", images: ["/og.png"] },
-  icons: { icon: "/brand/agenda-profissa-symbol.png", shortcut: "/brand/agenda-profissa-symbol.png", apple: "/brand/agenda-profissa-symbol.png" },
+  icons: { icon: "/brand/agenda-profissa-symbol-v2.png", shortcut: "/brand/agenda-profissa-symbol-v2.png", apple: "/brand/agenda-profissa-symbol-v2.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

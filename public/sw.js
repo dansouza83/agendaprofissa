@@ -1,5 +1,5 @@
-const CACHE = "agenda-profissa-static-v3";
-const STATIC_ASSETS = ["/manifest.webmanifest", "/brand/agenda-profissa-symbol.png", "/brand/agenda-profissa-logo-light.svg", "/brand/agenda-profissa-logo-dark.svg"];
+const CACHE = "agenda-profissa-static-v4";
+const STATIC_ASSETS = ["/manifest.webmanifest", "/brand/agenda-profissa-symbol-v2.png", "/brand/agenda-profissa-logo-light.svg", "/brand/agenda-profissa-logo-dark.svg"];
 self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(STATIC_ASSETS)));
