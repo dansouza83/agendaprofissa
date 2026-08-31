@@ -29,7 +29,7 @@
 
 .preview-device-picker > span b {
   color: #255f53;
-  font-size: .67rem;
+  font-size: .75rem;
   font-weight: 900;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -38,7 +38,13 @@
 .preview-device-picker > span small {
   margin-top: 2px;
   color: #667870;
-  font-size: .56rem;
+  font-size: .64rem;
+  font-weight: 700;
+}
+
+.preview-device-picker > span small strong {
+  color: #276f61;
+  font-weight: 950;
 }
 
 .preview-device-picker > div {
@@ -51,13 +57,13 @@
 
 .preview-device-picker button {
   display: inline-flex;
-  min-height: 32px;
+  min-height: 36px;
   align-items: center;
   gap: 5px;
   border-radius: 9px;
   padding: 5px 10px;
   color: #52675f;
-  font-size: .62rem;
+  font-size: .72rem;
   font-weight: 850;
   transition: background-color .2s, color .2s, box-shadow .2s, transform .2s;
 }
@@ -78,7 +84,7 @@
 }
 
 .preview-device-picker button span {
-  font-size: .9rem;
+  font-size: 1.05rem;
   line-height: 1;
 }
 
@@ -383,7 +389,7 @@
 
 .hero-mobile-stage .panel-demo-client-grid > button,
 .hero-mobile-stage .panel-demo-service-grid > button {
-  padding: 6px;
+  padding: 7px;
 }
 
 .hero-mobile-stage .panel-demo-client-grid > button:nth-child(n+4),
@@ -401,22 +407,24 @@
 .hero-mobile-stage .panel-demo-client-grid b,
 .hero-mobile-stage .panel-demo-service-grid > button > b {
   color: #edf8f3;
-  font-size: .37rem;
+  font-size: .56rem;
+  line-height: 1.25;
 }
 
 .hero-mobile-stage .panel-demo-client-grid small,
 .hero-mobile-stage .panel-demo-client-grid em,
 .hero-mobile-stage .panel-demo-service-grid > button > span:last-child {
   color: #8fa49c;
-  font-size: .3rem;
+  font-size: .42rem;
+  line-height: 1.25;
 }
 
 .hero-mobile-stage .panel-demo-service-grid > button > b {
-  margin-top: 4px;
+  margin-top: 5px;
 }
 
 .hero-mobile-stage .panel-demo-service-grid > button > span:last-child {
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .hero-mobile-stage .preview-cycle {
@@ -433,14 +441,32 @@
   border-top: 1px solid #294238;
   background: #0d1d18;
   padding: 5px 4px 7px;
+  box-shadow: 0 -10px 28px #63c6ab18;
+  animation: hero-mobile-nav-invite 2.8s ease-in-out infinite;
 }
 
 .hero-mobile-nav button {
   position: relative;
   display: grid;
   place-items: center;
+  min-width: 0;
+  min-height: 40px;
   border-radius: 9px;
   color: #91a79f;
+  cursor: pointer;
+  transition: background-color .2s, color .2s, transform .2s;
+}
+
+.hero-mobile-nav button:hover,
+.hero-mobile-nav button:focus-visible {
+  background: #1d3b31;
+  color: #c9eee3;
+  transform: translateY(-2px);
+}
+
+.hero-mobile-nav button:focus-visible {
+  outline: 2px solid #83cfba;
+  outline-offset: -2px;
 }
 
 .hero-mobile-nav button.active {
@@ -449,13 +475,16 @@
 }
 
 .hero-mobile-nav button > span {
-  font-size: .55rem;
+  font-size: .9rem;
+  line-height: 1;
 }
 
 .hero-mobile-nav button small {
   margin-top: 2px;
   color: inherit;
-  font-size: .3rem;
+  font-size: .46rem;
+  font-weight: 850;
+  letter-spacing: .01em;
 }
 
 .hero-mobile-nav button i {
@@ -478,6 +507,37 @@
   border-radius: 999px;
   background: #cfe2da80;
   content: "";
+}
+
+.hero-mobile-nav::before {
+  position: absolute;
+  z-index: 5;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #e9a06f;
+  padding: 3px 8px;
+  color: #18362f;
+  content: "TOQUE PARA TESTAR ↓";
+  font-size: .36rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.dashboard-preview-showcase .preview-float b {
+  font-size: .75rem;
+}
+
+.dashboard-preview-showcase .preview-float small {
+  font-size: .62rem;
+  font-weight: 750;
+}
+
+@keyframes hero-mobile-nav-invite {
+  0%, 100% { box-shadow: 0 -10px 28px #63c6ab12; }
+  50% { box-shadow: 0 -13px 34px #63c6ab36; }
 }
 
 .hero-mobile-selling-point {
@@ -530,6 +590,10 @@
 
 .dark .preview-device-picker > span small {
   color: #9db3ab;
+}
+
+.dark .preview-device-picker > span small strong {
+  color: #93dcc8;
 }
 
 .dark .preview-device-picker > div {
@@ -589,5 +653,9 @@
   .hero-mobile-phone {
     transition: none;
     transform: none;
+  }
+
+  .hero-mobile-nav {
+    animation: none;
   }
 }

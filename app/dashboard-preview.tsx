@@ -54,14 +54,14 @@ export function DashboardPreview() {
   return (
     <div className={`dashboard-preview-showcase dashboard-preview-${device} relative mx-auto min-w-0 w-full max-w-2xl lg:mx-0`}>
       <div className="preview-device-picker">
-        <span><b>Experimente agora</b><small>Comece pelo celular</small></span>
+        <span><b>Demonstração interativa</b><small><strong>☝ Teste rápido:</strong> {device === "mobile" ? "toque nos menus do celular" : "clique no menu lateral"}</small></span>
         <div role="tablist" aria-label="Escolha o formato da demonstração">
           <button type="button" role="tab" aria-selected={device === "mobile"} className={device === "mobile" ? "active" : ""} onClick={() => selectDevice("mobile")}><span aria-hidden="true">▯</span> Celular</button>
           <button type="button" role="tab" aria-selected={device === "web"} className={device === "web" ? "active" : ""} onClick={() => selectDevice("web")}><span aria-hidden="true">▱</span> Computador</button>
         </div>
       </div>
       {device === "mobile" ? <MobilePreview active={active} activeLabel={activeLabel} setActive={setActive} /> : <WebPreview active={active} activeLabel={activeLabel} setActive={setActive} />}
-      <div className="preview-float"><span>✓</span><div><b>{device === "mobile" ? "Praticidade no celular" : "Visão completa na web"}</b><small>Toque no menu para explorar</small></div></div>
+      <div className="preview-float"><span>✓</span><div><b>{device === "mobile" ? "Praticidade no celular" : "Visão completa na web"}</b><small>Clique ou toque no menu para testar agora</small></div></div>
     </div>
   );
 }

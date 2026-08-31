@@ -337,4 +337,6 @@ test("prioriza a demonstração mobile e permite alternar para a versão web", a
   assert.match(previewSource, /aria-selected=\{device === "mobile"\}/);
   assert.match(previewSource, /aria-label="Demonstração das áreas no celular"/);
   assert.match(previewSource, /Praticidade no celular/);
+  assert.match(previewSource, /Teste rápido:/);
+  assert.match(previewSource, /toque nos menus do celular/);
 });
