@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@fontsource-variable/manrope/wght.css";
 import "./globals.css";
 import "./landing.css";
+import "./dashboard-preview-devices.css";
 import { PwaRegistration } from "./pwa";
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();

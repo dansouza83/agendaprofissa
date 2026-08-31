@@ -328,3 +328,13 @@ test("publica vídeo responsivo de demonstração com chamada para ação", asyn
   assert.match(shellSource, /href="\/#demonstracao"/);
   assert.ok(video.size > 100_000);
 });
+
+test("prioriza a demonstração mobile e permite alternar para a versão web", async () => {
+  const previewSource = await readFile(new URL("../app/dashboard-preview.tsx", import.meta.url), "utf8");
+  assert.match(previewSource, /useState<PreviewDevice>\("mobile"\)/);
+  assert.match(previewSource, /role="tab"[\s\S]*Celular/);
+  assert.match(previewSource, /role="tab"[\s\S]*Computador/);
+  assert.match(previewSource, /aria-selected=\{device === "mobile"\}/);
+  assert.match(previewSource, /aria-label="Demonstração das áreas no celular"/);
+  assert.match(previewSource, /Praticidade no celular/);
+});
