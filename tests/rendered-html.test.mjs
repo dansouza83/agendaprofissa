@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import test from "node:test";
 
 const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -314,4 +314,17 @@ test("destaca o WhatsApp na landing e prepara mensagens contextuais na agenda", 
   assert.match(whatsappSource, /https:\/\/wa\.me\//);
   assert.match(whatsappSource, /paymentStatus === "paid"/);
   assert.match(whatsappSource, /O pagamento ainda está pendente de confirmação/);
+});
+
+test("publica vídeo responsivo de demonstração com chamada para ação", async () => {
+  const landingSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const shellSource = await readFile(new URL("../app/public-shell.tsx", import.meta.url), "utf8");
+  const video = await stat(new URL("../public/videos/agenda-profissa-tour.webm", import.meta.url));
+  assert.match(landingSource, /id="demonstracao"/);
+  assert.match(landingSource, /agenda-profissa-tour\.webm/);
+  assert.match(landingSource, /autoPlay[\s\S]*muted[\s\S]*loop[\s\S]*playsInline[\s\S]*controls/);
+  assert.match(landingSource, /Modo escuro e claro/);
+  assert.match(landingSource, /Navegação adaptada ao celular/);
+  assert.match(shellSource, /href="\/#demonstracao"/);
+  assert.ok(video.size > 100_000);
 });

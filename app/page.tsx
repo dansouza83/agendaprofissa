@@ -166,6 +166,43 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section id="demonstracao" className="landing-product-tour scroll-mt-32 px-4 py-20 sm:px-6 lg:scroll-mt-24 lg:py-24">
+          <div className="product-tour-grid mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[.8fr_1.2fr]">
+            <div data-reveal="left">
+              <p className="section-eyebrow">Veja funcionando</p>
+              <h2 className="section-title">Do computador ao celular, sem mudar o jeito de trabalhar.</h2>
+              <p className="product-tour-copy">A mesma agenda se reorganiza para cada tela. No computador, o menu lateral mantém tudo visível; no celular, os atalhos ficam ao alcance do polegar.</p>
+              <ul className="product-tour-benefits" aria-label="Destaques da demonstração">
+                <li><span aria-hidden="true">✓</span> Modo escuro e claro</li>
+                <li><span aria-hidden="true">✓</span> Menu lateral no computador</li>
+                <li><span aria-hidden="true">✓</span> Navegação adaptada ao celular</li>
+              </ul>
+              <div className="product-tour-actions">
+                <Link href="/sistema?cadastro=profissional" className="landing-button landing-button-primary">Experimentar o Agenda Profissa <span aria-hidden="true">→</span></Link>
+                <Link href="/#planos" className="product-tour-plan-link">Conhecer os planos</Link>
+              </div>
+            </div>
+            <div className="product-tour-video-shell" data-reveal="right" data-reveal-delay="1">
+              <div className="product-tour-video-head"><span aria-hidden="true"><i /><i /><i /></span><b>Demonstração do produto</b><em>Web + mobile</em></div>
+              <video
+                className="product-tour-video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls
+                preload="metadata"
+                poster="/videos/agenda-profissa-tour-poster.png"
+                aria-label="Vídeo demonstrando o painel Agenda Profissa nos modos escuro e claro em computador e celular"
+              >
+                <source src="/videos/agenda-profissa-tour.webm" type="video/webm" />
+                Seu navegador não suporta a reprodução deste vídeo.
+              </video>
+              <p className="product-tour-video-caption"><span aria-hidden="true">✓</span> Navegação interna e responsividade em uma demonstração de aproximadamente 22 segundos.</p>
+            </div>
+          </div>
+        </section>
+
         <section id="como-funciona" className="scroll-mt-32 bg-[#183f37] px-4 py-20 text-white sm:px-6 lg:scroll-mt-24 lg:py-28">
           <div className="mx-auto max-w-7xl">
             <SectionIntro reveal light eyebrow="Comece com simplicidade" title="Do cadastro ao atendimento em três passos." text="Você configura o espaço uma vez e passa a conduzir a rotina por uma agenda clara." />
