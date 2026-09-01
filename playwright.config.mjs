@@ -8,6 +8,20 @@ export default defineConfig({
   timeout: 45_000,
   expect: { timeout: 5_000 },
   reporter: [["list"]],
+  webServer: {
+    command: "pnpm run dev",
+    url: "http://localhost:3000",
+    reuseExistingServer: false,
+    timeout: 120_000,
+    env: {
+      ...process.env,
+      NEXT_PUBLIC_SUPABASE_URL: "",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: "",
+      NEXT_PUBLIC_ALLOW_LOCAL_SIGNUP_WITHOUT_CAPTCHA: "true",
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
+    },
+  },
   use: {
     baseURL: "http://localhost:3000",
     channel: "chrome",

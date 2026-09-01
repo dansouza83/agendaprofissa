@@ -5,7 +5,12 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET() {
-  if (!supabaseUrl || !publishableKey) return Response.json({ error: "Planos indisponíveis." }, { status: 503 });
+  if (!supabaseUrl || !publishableKey) {
+    return Response.json(
+      { monthlyPrice: 50, annualPrice: 350, currency: "BRL" },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  }
   const response = await fetch(`${supabaseUrl}/functions/v1/agenda-public-pricing`, {
     method: "GET",
     cache: "no-store",

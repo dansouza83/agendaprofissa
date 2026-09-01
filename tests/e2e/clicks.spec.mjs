@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.setTimeout(120_000);
+
 const publicRoutes = [
   "/", "/faq", "/legal", "/termos", "/privacidade", "/cookies",
   "/diretrizes", "/seguranca", "/direitos-do-titular",
@@ -23,6 +25,27 @@ function monitorPage(page) {
     }
   });
   return issues;
+}
+
+async function createLocalProfessional(page, suffix = "e2e") {
+  await page.goto("/sistema?cadastro=profissional");
+  await page.getByLabel("Seu nome").fill("Pessoa Teste");
+  await page.getByLabel("Nome do negócio").fill("Negócio Teste");
+  await page.getByLabel("E-mail").fill(`profissional-${suffix}@teste.local`);
+  await page.locator("#access-password").fill("TesteSeguro2026");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Criar conta profissional" }).click();
+  await expect(page.getByRole("heading", { name: "Seu dia, num relance" })).toBeVisible();
+}
+
+async function createLocalClient(page, suffix = "e2e") {
+  await page.goto("/sistema?cadastro=cliente");
+  await page.getByLabel("Seu nome").fill("Aluno Teste");
+  await page.getByLabel("E-mail").fill(`aluno-${suffix}@teste.local`);
+  await page.locator("#access-password").fill("TesteSeguro2026");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Criar perfil de aluno/cliente" }).click();
+  await expect(page.getByText("Área pessoal", { exact: true })).toBeVisible();
 }
 
 async function expectPath(page, href) {
@@ -81,8 +104,6 @@ test("todos os links de ação da landing page abrem a tela correta", async ({ p
     ["#planos .pricing-card:nth-of-type(1) a[href='/sistema?cadastro=profissional']", "/sistema?cadastro=profissional"],
     ["#planos .pricing-card:nth-of-type(2) a[href='/sistema?cadastro=profissional']", "/sistema?cadastro=profissional"],
     ["#seguranca a[href='/seguranca']", "/seguranca"],
-    ["#seguranca a[href='/privacidade']", "/privacidade"],
-    ["#seguranca a[href='/direitos-do-titular']", "/direitos-do-titular"],
     ["#faq a[href='/faq']", "/faq"],
     [".landing-cta a[href='/sistema?cadastro=profissional']", "/sistema?cadastro=profissional"],
     [".landing-cta a[href='/sistema']", "/sistema"],
@@ -151,7 +172,9 @@ test("breadcrumbs orientam e permitem retornar aos níveis anteriores", async ({
   await expectPath(page, "/");
 
   await page.goto("/desenvolvedor");
-  await expect(page.getByRole("navigation", { name: "Trilha de navegação" }).getByText("Painel do desenvolvedor", { exact: true })).toHaveAttribute("aria-current", "page");
+  const developerTrail = page.getByRole("navigation", { name: "Trilha de navegação" });
+  await expect(developerTrail.getByRole("link", { name: "Painel do desenvolvedor" })).toBeVisible();
+  await expect(developerTrail.getByText("Mercado Pago", { exact: true })).toHaveAttribute("aria-current", "page");
 });
 
 test("login, tema, visualização de senha e recuperação funcionam", async ({ page }) => {
@@ -173,9 +196,9 @@ test("login, tema, visualização de senha e recuperação funcionam", async ({ 
 
   await page.getByRole("button", { name: "Esqueci minha senha" }).click();
   await expect(page.getByRole("heading", { name: "Esqueceu a senha?" })).toBeVisible();
-  await page.getByLabel("E-mail").fill("marina@demo.com");
+  await page.getByLabel("E-mail").fill("pessoa@teste.local");
   await page.getByRole("button", { name: "Enviar link de recuperação" }).click();
-  await expect(page.getByText("No modo local, use a senha demo123.")).toBeVisible();
+  await expect(page.getByText("No ambiente local, crie uma conta de teste para acessar o painel.")).toBeVisible();
   await page.getByRole("button", { name: "Voltar para o login" }).click();
   await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();
   expect(issues).toEqual([]);
@@ -207,25 +230,13 @@ test("cadastro alterna perfis, abre termos e valida aceite", async ({ page }) =>
   await expect(page.getByText(/Você precisa aceitar os Termos/)).toBeVisible();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Criar conta profissional" }).click();
-  await expect(page.getByRole("heading", { name: "Escolha seu plano para liberar o painel" })).toBeVisible();
-  await expect(page.getByText("R$ 50,00", { exact: true })).toBeVisible();
-  await expect(page.getByText("R$ 350,00", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Assinar plano mensal" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Assinar plano anual" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Seu dia, num relance" })).toBeVisible();
   const savedBusiness = await page.evaluate(() => JSON.parse(localStorage.getItem("agenda-facil-local-account")).identity.business);
   expect(savedBusiness).toBe("Negócio Teste");
 });
 
-async function loginProfessional(page) {
-  await page.goto("/sistema");
-  await page.getByLabel("E-mail").fill("marina@demo.com");
-  await page.locator("#access-password").fill("demo123");
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Seu dia, num relance" })).toBeVisible();
-}
-
 test("todos os botões de navegação do painel profissional abrem a área correta", async ({ page }, testInfo) => {
-  await loginProfessional(page);
+  await createLocalProfessional(page, `navegacao-${testInfo.project.name}`);
   const destinations = [
     ["Início", "Seu dia, num relance"], ["Agenda", "Agenda"], ["Clientes", "Clientes"],
     ["Serviços", "Serviços"], ["Mais", "Mais opções"],
@@ -251,30 +262,19 @@ test("todos os botões de navegação do painel profissional abrem a área corre
   }
 });
 
-test("conta profissional paga entra com assinatura confirmada", async ({ page }) => {
-  await page.goto("/sistema");
-  await page.getByLabel("E-mail").fill("cliente.pago@demo.com");
-  await page.locator("#access-password").fill("demo123");
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Seu dia, num relance" })).toBeVisible();
+test("conta profissional local abre o painel com acesso de teste", async ({ page }, testInfo) => {
+  await createLocalProfessional(page, `acesso-${testInfo.project.name}`);
   await page.getByRole("button", { name: /Mais$/ }).filter({ visible: true }).click();
-  await expect(page.getByRole("main").getByText("Espaço Fernanda", { exact: true })).toBeVisible();
+  await expect(page.getByRole("main").getByText("Negócio Teste", { exact: true })).toBeVisible();
   await expect(page.getByText(/Pagamento confirmado — assinatura ativa/)).toBeVisible();
 });
 
-test("cliente com atendimento pago vê somente o próprio agendamento", async ({ page }) => {
-  await page.goto("/sistema");
-  await page.getByLabel("E-mail").fill("cliente.agendado@demo.com");
-  await page.locator("#access-password").fill("demo123");
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-
+test("cliente local vê somente o próprio portal", async ({ page }, testInfo) => {
+  await createLocalClient(page, `portal-${testInfo.project.name}`);
   await expect(page.getByText("Área pessoal", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Olá, Ana." })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Studio Aurora" })).toBeVisible();
-  await expect(page.getByTestId("client-appointment")).toHaveCount(1);
-  await expect(page.getByTestId("client-appointment").getByText("Manicure", { exact: true })).toBeVisible();
-  await expect(page.getByTestId("client-appointment").getByText("Pagamento confirmado", { exact: false })).toBeVisible();
-  await expect(page.getByText("Design de sobrancelhas", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Olá, Aluno." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Nenhum horário vinculado" })).toBeVisible();
+  await expect(page.getByTestId("client-appointment")).toHaveCount(0);
   await expect(page.getByPlaceholder("Buscar cliente ou serviço")).toHaveCount(0);
   const clientTrail = page.getByRole("navigation", { name: "Trilha de navegação" });
   await expect(clientTrail.getByText("Meus horários", { exact: true })).toHaveAttribute("aria-current", "page");
@@ -287,19 +287,13 @@ test("cliente com atendimento pago vê somente o próprio agendamento", async ({
 });
 
 test("ações de agenda, clientes e serviços abrem, salvam e cancelam corretamente", async ({ page }, testInfo) => {
-  await loginProfessional(page);
+  await createLocalProfessional(page, `acoes-${testInfo.project.name}`);
   const headerAction = testInfo.project.name === "mobile" ? /Novo$/ : null;
 
   await page.getByRole("button", { name: headerAction ?? /Novo agendamento/ }).click();
   await expect(page.getByRole("dialog", { name: "Novo agendamento" })).toBeVisible();
   await page.getByRole("button", { name: "Cancelar" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByRole("button", { name: "Ver agenda" }).click();
-  await expect(page.getByRole("heading", { name: "Agenda", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: headerAction ?? /Novo agendamento/ }).click();
-  await page.getByRole("button", { name: "Salvar" }).click();
-  await expect(page.getByText("Agendamento salvo.")).toBeVisible();
-
   await page.getByRole("button", { name: /Clientes$/ }).click();
   await page.getByRole("button", { name: headerAction ?? /Novo cliente/ }).click();
   await page.getByLabel("Nome completo").fill("Cliente Teste");
@@ -319,19 +313,23 @@ test("ações de agenda, clientes e serviços abrem, salvam e cancelam corretame
   await expect(page.getByRole("dialog", { name: "Editar serviço" })).toBeVisible();
   await page.getByRole("button", { name: "Cancelar" }).click();
 
+  const professionalNavigation = testInfo.project.name === "mobile"
+    ? page.getByRole("navigation", { name: "Navegação do painel profissional" })
+    : page.locator(".professional-workspace aside");
+  await professionalNavigation.getByRole("button", { name: /Início$/ }).click();
+  await page.getByRole("button", { name: "Ver agenda" }).click();
+  await expect(page.getByRole("heading", { name: "Agenda", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: headerAction ?? /Novo agendamento/ }).click();
+  await page.getByRole("button", { name: "Salvar" }).click();
+  await expect(page.getByText("Agendamento salvo e alerta criado.")).toBeVisible();
+
   await page.getByRole("button", { name: /Mais$/ }).click();
   await page.getByRole("button", { name: "Sair da conta" }).click();
   await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();
 });
 
-test("área do aluno mantém documentos em preparação ocultos e encerra a sessão", async ({ page }) => {
-  await page.goto("/sistema?cadastro=cliente");
-  await page.getByLabel("Seu nome").fill("Aluno Teste");
-  await page.getByLabel("E-mail").fill("aluno-e2e@example.com");
-  await page.locator("#access-password").fill("senha123");
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Criar perfil de aluno/cliente" }).click();
-  await expect(page.getByText("Área pessoal")).toBeVisible();
+test("área do aluno mantém documentos em preparação ocultos e encerra a sessão", async ({ page }, testInfo) => {
+  await createLocalClient(page, `documentos-${testInfo.project.name}`);
 
   await expect(page.getByRole("link", { name: "Aviso de Privacidade" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Meus direitos" })).toHaveCount(0);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { ChatMessage, WorkspaceData } from "../domain";
 import { markOnlineMessagesRead, sendOnlineMessage } from "../lib/supabase";
 
@@ -14,29 +14,28 @@ export function MessageNotification({ count, onClick }: { count: number; onClick
   return <button type="button" onClick={onClick} className="relative grid h-11 w-11 place-items-center rounded-xl border border-[#dce6e1] bg-white text-lg text-[#2f7d70]" aria-label={count ? `${count} alerta(s) ou mensagem(ns) não lida(s)` : "Abrir alertas e mensagens"} title="Alertas e mensagens"><span aria-hidden="true">✉</span>{count > 0 && <span className="message-notification-badge absolute -right-1 -top-1 min-w-5 rounded-full bg-[#b54134] px-1.5 py-0.5 text-center text-[10px] font-black leading-4 text-white">{count > 99 ? "99+" : count}</span>}</button>;
 }
 
-export function ChatPanel({ data, messages, setMessages, online, audience }: { data: WorkspaceData; messages: ChatMessage[]; setMessages: (messages: ChatMessage[]) => void; online: boolean; audience: ChatAudience }) {
+export function ChatPanel({ data, messages, setMessages, online, audience }: { data: WorkspaceData; messages: ChatMessage[]; setMessages: Dispatch<SetStateAction<ChatMessage[]>>; online: boolean; audience: ChatAudience }) {
   const availableClients = useMemo(() => audience === "professional" ? data.clients.filter((client) => Boolean(client.userId)) : data.clients, [audience, data.clients]);
   const [selectedClientId, setSelectedClientId] = useState(availableClients[0]?.id ?? "");
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
-  const selectedClient = availableClients.find((client) => client.id === selectedClientId) ?? availableClients[0];
+  const activeClientId = availableClients.some((client) => client.id === selectedClientId) ? selectedClientId : availableClients[0]?.id ?? "";
+  const selectedClient = availableClients.find((client) => client.id === activeClientId);
   const conversation = messages.filter((message) => message.clientId === selectedClient?.id).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const selectedUnreadKey = messages.filter((message) => message.clientId === selectedClient?.id && !message.mine && !message.readAt).map((message) => message.id).join(",");
 
   useEffect(() => {
-    if (selectedClientId && availableClients.some((client) => client.id === selectedClientId)) return;
-    setSelectedClientId(availableClients[0]?.id ?? "");
-  }, [availableClients, selectedClientId]);
-
-  useEffect(() => {
     if (!selectedClient) return;
-    const unread = messages.filter((message) => message.clientId === selectedClient.id && !message.mine && !message.readAt);
-    if (!unread.length) return;
+    const unreadIds = new Set(messages.filter((message) => message.clientId === selectedClient.id && !message.mine && !message.readAt).map((message) => message.id));
+    if (!unreadIds.size) return;
     const readAt = new Date().toISOString();
-    setMessages(messages.map((message) => unread.some((item) => item.id === message.id) ? { ...message, readAt } : message));
+    const frame = window.requestAnimationFrame(() => {
+      setMessages((current) => current.map((message) => unreadIds.has(message.id) ? { ...message, readAt } : message));
+    });
     if (online) void markOnlineMessagesRead(selectedClient.tenantId, selectedClient.id).catch(() => setNotice("Não foi possível confirmar a leitura agora."));
-  }, [online, selectedClient?.id, selectedUnreadKey]);
+    return () => window.cancelAnimationFrame(frame);
+  }, [messages, online, selectedClient, selectedUnreadKey, setMessages]);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -47,7 +46,7 @@ export function ChatPanel({ data, messages, setMessages, online, audience }: { d
       const message = online
         ? await sendOnlineMessage(selectedClient.tenantId, selectedClient.id, draft)
         : { id: crypto.randomUUID(), tenantId: selectedClient.tenantId, clientId: selectedClient.id, senderUserId: "local", body: draft.trim(), createdAt: new Date().toISOString(), readAt: null, mine: true } satisfies ChatMessage;
-      setMessages([...messages, message]);
+      setMessages((current) => [...current, message]);
       setDraft("");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Não foi possível enviar a mensagem.");

@@ -53,6 +53,27 @@ function expectNoIssues(issues) {
   expect(uniqueIssues, uniqueIssues.join("\n")).toEqual([]);
 }
 
+async function createLocalProfessional(page, suffix) {
+  await page.goto("/sistema?cadastro=profissional");
+  await page.getByLabel("Seu nome").fill("Profissional Contraste");
+  await page.getByLabel("Nome do negócio").fill("Estúdio Contraste");
+  await page.getByLabel("E-mail").fill(`contraste-${suffix}@teste.local`);
+  await page.locator("#access-password").fill("Contraste2026");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Criar conta profissional" }).click();
+  await expect(page.getByRole("heading", { name: "Seu dia, num relance" })).toBeVisible();
+}
+
+async function createLocalClient(page, suffix) {
+  await page.goto("/sistema?cadastro=cliente");
+  await page.getByLabel("Seu nome").fill("Cliente Contraste");
+  await page.getByLabel("E-mail").fill(`cliente-contraste-${suffix}@teste.local`);
+  await page.locator("#access-password").fill("Contraste2026");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Criar perfil de aluno/cliente" }).click();
+  await expect(page.getByText("Área pessoal", { exact: true })).toBeVisible();
+}
+
 test("public and legal pages meet WCAG AA color contrast", async ({ page }) => {
   const issues = [];
   for (const [label, route] of publicRoutes) {
@@ -62,7 +83,7 @@ test("public and legal pages meet WCAG AA color contrast", async ({ page }) => {
   expectNoIssues(issues);
 });
 
-test("login, registration, recovery, subscription and developer states meet WCAG AA color contrast", async ({ page }) => {
+test("login, registration, recovery, developer and local dashboard states meet WCAG AA color contrast", async ({ page }, testInfo) => {
   const issues = [];
 
   await page.goto("/sistema");
@@ -80,24 +101,15 @@ test("login, registration, recovery, subscription and developer states meet WCAG
   await page.goto("/desenvolvedor");
   await auditBothThemes(page, "developer access", issues);
 
-  await page.goto("/sistema?cadastro=profissional");
-  await page.getByLabel("Seu nome").fill("Contraste Teste");
-  await page.getByLabel("Nome do negócio").fill("Estúdio Contraste");
-  await page.getByLabel("E-mail").fill("contraste@teste.local");
-  await page.locator("#access-password").fill("senha1234");
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Criar conta profissional" }).click();
-  await auditBothThemes(page, "subscription gate", issues);
+  await createLocalProfessional(page, `estados-${testInfo.project.name}`);
+  await auditBothThemes(page, "local professional dashboard", issues);
 
   expectNoIssues(issues);
 });
 
-test("every professional dashboard section and dialog meets WCAG AA color contrast", async ({ page }) => {
+test("every professional dashboard section and dialog meets WCAG AA color contrast", async ({ page }, testInfo) => {
   const issues = [];
-  await page.goto("/sistema");
-  await page.getByLabel("E-mail").fill("marina@demo.com");
-  await page.locator("#access-password").fill("demo123");
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await createLocalProfessional(page, `painel-${testInfo.project.name}`);
 
   const sections = [
     ["Início", "professional dashboard"],
@@ -128,12 +140,9 @@ test("every professional dashboard section and dialog meets WCAG AA color contra
   expectNoIssues(issues);
 });
 
-test("customer portal meets WCAG AA color contrast", async ({ page }) => {
+test("customer portal meets WCAG AA color contrast", async ({ page }, testInfo) => {
   const issues = [];
-  await page.goto("/sistema");
-  await page.getByLabel("E-mail").fill("cliente.agendado@demo.com");
-  await page.locator("#access-password").fill("demo123");
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await createLocalClient(page, `portal-${testInfo.project.name}`);
   await auditBothThemes(page, "customer appointments portal", issues);
   expectNoIssues(issues);
 });

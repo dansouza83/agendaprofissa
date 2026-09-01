@@ -65,9 +65,17 @@ export default defineConfig(async ({ mode }) => {
     // `process.env.NEXT_PUBLIC_*` values on its own. Define only the explicit
     // browser-safe allowlist so Cloudflare build variables reach the client.
     define: publicEnvironment,
-    server: isCodexSeatbeltSandbox
-      ? { watch: { useFsEvents: false, usePolling: true } }
-      : undefined,
+    server: {
+      // Vite 8 enables browser-console forwarding automatically when it
+      // detects a coding agent. During the initial WebSocket connection that
+      // forwarder can try to call `send` before the socket exists, replacing
+      // the original browser event with an unhandled `undefined.send` error.
+      // Keep HMR enabled, but leave console events in the browser console.
+      forwardConsole: false,
+      ...(isCodexSeatbeltSandbox
+        ? { watch: { useFsEvents: false, usePolling: true } }
+        : {}),
+    },
     plugins: [
       vinext(),
       sites(),

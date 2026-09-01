@@ -257,7 +257,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-4xl">
             <SectionIntro reveal centered eyebrow="Perguntas frequentes" title="Dúvidas comuns, respostas diretas." text="Entenda como o sistema funciona antes de criar sua conta." />
             <div className="mt-10 divide-y divide-[#dfe8e3] border-y border-[#dfe8e3]">
-              {faqs.map(([question,answer], index) => <details key={question} className="faq-item" data-reveal="up" data-reveal-delay={String(Math.min(index, 4))}><summary>{question}<span>＋</span></summary><p>{answer}</p></details>)}
+              {faqs.map(([question,answer], index) => <details key={question} suppressHydrationWarning className="faq-item" data-reveal="up" data-reveal-delay={String(Math.min(index, 4))}><summary>{question}<span>＋</span></summary><p>{answer}</p></details>)}
             </div>
             <div className="mt-8 text-center"><Link className="font-extrabold text-[#2f7d70]" href="/faq">Ver todas as perguntas →</Link></div>
           </div>
