@@ -110,7 +110,23 @@ Para ativar cobranças:
 4. Cadastre/teste o webhook de assinaturas em `/api/billing/webhook` e só depois troque para credenciais de produção.
 5. Nunca coloque Access Token ou chaves secretas em variáveis iniciadas por `NEXT_PUBLIC_`.
 
-PIX avulso ainda não foi ativado; esta etapa usa a API de Assinaturas recorrentes do Mercado Pago.
+O Mercado Pago desta seção é usado somente na assinatura do profissional com o Agenda Profissa. O pagamento de cada atendimento pelo cliente usa o fluxo PIX direto descrito abaixo e não passa pelo Agenda Profissa.
+
+## Recebimento PIX direto do atendimento
+
+O profissional cadastra sua própria chave PIX no painel. Somente o cliente autenticado e vinculado ao agendamento pode visualizar essa chave. O cliente paga diretamente ao profissional, envia um comprovante privado (JPG, PNG, WebP ou PDF, até 5 MB) e o profissional confirma manualmente apenas depois de conferir a entrada do valor.
+
+Para o aviso automático de pagamento confirmado no WhatsApp, publique a função `agenda-whatsapp-payment-confirmed` e configure como segredos do Supabase:
+
+- `WHATSAPP_ACCESS_TOKEN`
+- `WHATSAPP_PHONE_NUMBER_ID`
+- `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE`
+- `WHATSAPP_GRAPH_API_VERSION` (opcional; padrão atual do projeto: `v23.0`)
+- `WHATSAPP_TEMPLATE_LANGUAGE` (opcional; padrão: `pt_BR`)
+
+O modelo aprovado no WhatsApp Manager precisa ter seis variáveis no corpo, nesta ordem: nome do cliente, serviço, data, horário, nome do negócio e contato do profissional. Exemplo: `Olá, {{1}}! O pagamento de {{2}} foi confirmado. Horário: {{3}} às {{4}}. Atendimento: {{5}}. Contato: {{6}}.`
+
+Sem essas credenciais, a confirmação e a notificação interna continuam funcionando; somente o envio automático pelo WhatsApp permanece desativado. Chaves do WhatsApp nunca devem usar o prefixo `NEXT_PUBLIC_`.
 
 ## Publicação
 

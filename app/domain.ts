@@ -3,6 +3,31 @@ export type Client = { id: string; tenantId: string; userId?: string; businessNa
 export type Service = { id: string; tenantId: string; name: string; duration: number; price: number; color: string; active: boolean };
 export type Appointment = { id: string; tenantId: string; clientId: string; serviceId: string; date: string; time: string; status: Status; notes: string; paymentStatus: "paid" | "pending"; paymentConfirmedAt?: string | null };
 export type ChatMessage = { id: string; tenantId: string; clientId: string; senderUserId: string; body: string; createdAt: string; readAt: string | null; mine: boolean };
-export type AppointmentNotification = { id: string; tenantId: string; appointmentId: string; clientId: string; type: "payment_pending" | "payment_confirmed"; title: string; body: string; createdAt: string; readAt: string | null };
-export type WorkspaceData = { clients: Client[]; services: Service[]; appointments: Appointment[]; messages: ChatMessage[]; notifications?: AppointmentNotification[] };
+export type AppointmentNotificationType = "appointment_created" | "payment_pending" | "receipt_submitted" | "payment_confirmed";
+export type AppointmentNotification = { id: string; tenantId: string; appointmentId: string; clientId: string; type: AppointmentNotificationType; title: string; body: string; createdAt: string; readAt: string | null };
+export type TenantPaymentSettings = { tenantId: string; pixKey: string; updatedAt: string | null };
+export type PaymentSubmissionStatus = "submitted" | "confirmed" | "rejected";
+export type PaymentSubmission = {
+  id: string;
+  tenantId: string;
+  appointmentId: string;
+  clientId: string;
+  paymentMethod: "pix";
+  receiptPath: string;
+  receiptOriginalName: string;
+  receiptContentType: "image/jpeg" | "image/png" | "image/webp" | "application/pdf";
+  receiptSizeBytes: number;
+  status: PaymentSubmissionStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+export type WorkspaceData = {
+  clients: Client[];
+  services: Service[];
+  appointments: Appointment[];
+  messages: ChatMessage[];
+  notifications?: AppointmentNotification[];
+  paymentSettings?: TenantPaymentSettings[];
+  paymentSubmissions?: PaymentSubmission[];
+};
 export type Identity = { name: string; business: string; email: string; initials: string; role?: string };

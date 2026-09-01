@@ -1,5 +1,5 @@
 import { createClient, type AuthChangeEvent, type SupabaseClient, type User } from "@supabase/supabase-js";
-import type { Appointment, AppointmentNotification, ChatMessage, Client, Identity, Service, WorkspaceData } from "../domain";
+import type { Appointment, AppointmentNotification, AppointmentNotificationType, ChatMessage, Client, Identity, PaymentSubmission, Service, TenantPaymentSettings, WorkspaceData } from "../domain";
 
 export type AccountType = "professional" | "client";
 export const developerEmail = "dansouzafloripa@gmail.com";
@@ -211,6 +211,10 @@ export async function loadOnlineWorkspace() {
     if (messageResult.error) throw messageResult.error;
     const notificationResult = await api.from("appointment_notifications").select("id, tenant_id, appointment_id, client_id, notification_type, title, body, read_at, created_at").eq("recipient_user_id", userData.user.id).order("created_at", { ascending: false });
     if (notificationResult.error) throw notificationResult.error;
+    const paymentSettingsResult = tenantIds.length ? await api.from("tenant_payment_settings").select("tenant_id, pix_key, updated_at").in("tenant_id", tenantIds) : { data: [], error: null };
+    if (paymentSettingsResult.error) throw paymentSettingsResult.error;
+    const paymentSubmissionsResult = clientIds.length ? await api.from("appointment_payment_submissions").select("id, tenant_id, appointment_id, client_id, payment_method, receipt_path, receipt_original_name, receipt_content_type, receipt_size_bytes, status, created_at, updated_at").in("client_id", clientIds).eq("payment_method", "pix").order("created_at", { ascending: false }) : { data: [], error: null };
+    if (paymentSubmissionsResult.error) throw paymentSubmissionsResult.error;
     const zones = new Map((tenantResult.data ?? []).map((row) => [row.id, row.timezone]));
     const businessNames = new Map((tenantResult.data ?? []).map((row) => [row.id, row.name]));
     const data: WorkspaceData = {
@@ -219,6 +223,8 @@ export async function loadOnlineWorkspace() {
       appointments: (appointmentResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, clientId: row.client_id, serviceId: row.service_id, ...localParts(row.starts_at, zones.get(row.tenant_id) ?? "America/Sao_Paulo"), status: row.status, notes: row.notes, paymentStatus: row.payment_status === "paid" ? "paid" : "pending", paymentConfirmedAt: row.payment_confirmed_at } as Appointment)),
       messages: (messageResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, clientId: row.client_id, senderUserId: row.sender_user_id, body: row.body, readAt: row.read_at, createdAt: row.created_at, mine: row.sender_user_id === userData.user.id } as ChatMessage)),
       notifications: (notificationResult.data ?? []).map(mapNotification),
+      paymentSettings: (paymentSettingsResult.data ?? []).map(mapPaymentSettings),
+      paymentSubmissions: (paymentSubmissionsResult.data ?? []).map(mapPaymentSubmission),
     };
     return { tenantId: `client-${userData.user.id}`, identity: { name, business: "Área do aluno/cliente", email: userData.user.email ?? "", initials: initials(name), role: "client" } satisfies Identity, data };
   }
@@ -226,15 +232,17 @@ export async function loadOnlineWorkspace() {
   if (membershipError) throw membershipError;
   if (!membership) throw new Error("Seu usuário ainda não está vinculado a um negócio.");
   const tenantId = membership.tenant_id as string;
-  const [tenantResult, clientsResult, servicesResult, appointmentsResult, messagesResult, notificationsResult] = await Promise.all([
+  const [tenantResult, clientsResult, servicesResult, appointmentsResult, messagesResult, notificationsResult, paymentSettingsResult, paymentSubmissionsResult] = await Promise.all([
     api.from("tenants").select("id, name, timezone").eq("id", tenantId).single(),
     api.from("clients").select("id, tenant_id, user_id, name, phone, email, notes").eq("tenant_id", tenantId).order("name"),
     api.from("services").select("id, tenant_id, name, duration_minutes, price_cents, color, active").eq("tenant_id", tenantId).order("name"),
     api.from("appointments").select("id, tenant_id, client_id, service_id, starts_at, status, notes, payment_status, payment_confirmed_at").eq("tenant_id", tenantId).order("starts_at"),
     api.from("chat_messages").select("id, tenant_id, client_id, sender_user_id, body, read_at, created_at").eq("tenant_id", tenantId).order("created_at"),
     api.from("appointment_notifications").select("id, tenant_id, appointment_id, client_id, notification_type, title, body, read_at, created_at").eq("recipient_user_id", userData.user.id).order("created_at", { ascending: false }),
+    api.from("tenant_payment_settings").select("tenant_id, pix_key, updated_at").eq("tenant_id", tenantId),
+    api.from("appointment_payment_submissions").select("id, tenant_id, appointment_id, client_id, payment_method, receipt_path, receipt_original_name, receipt_content_type, receipt_size_bytes, status, created_at, updated_at").eq("tenant_id", tenantId).eq("payment_method", "pix").order("created_at", { ascending: false }),
   ]);
-  const error = tenantResult.error || clientsResult.error || servicesResult.error || appointmentsResult.error || messagesResult.error || notificationsResult.error;
+  const error = tenantResult.error || clientsResult.error || servicesResult.error || appointmentsResult.error || messagesResult.error || notificationsResult.error || paymentSettingsResult.error || paymentSubmissionsResult.error;
   if (error) throw error;
   const tenant = tenantResult.data;
   const identity: Identity = { name, business: tenant.name, email: userData.user.email ?? "", initials: initials(name), role: membership.role };
@@ -243,11 +251,21 @@ export async function loadOnlineWorkspace() {
   const appointments: Appointment[] = (appointmentsResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, clientId: row.client_id, serviceId: row.service_id, ...localParts(row.starts_at, tenant.timezone), status: row.status, notes: row.notes, paymentStatus: row.payment_status === "paid" ? "paid" : "pending", paymentConfirmedAt: row.payment_confirmed_at } as Appointment));
   const messages: ChatMessage[] = (messagesResult.data ?? []).map((row) => ({ id: row.id, tenantId: row.tenant_id, clientId: row.client_id, senderUserId: row.sender_user_id, body: row.body, readAt: row.read_at, createdAt: row.created_at, mine: row.sender_user_id === userData.user.id }));
   const notifications = (notificationsResult.data ?? []).map(mapNotification);
-  return { tenantId, identity, data: { clients, services, appointments, messages, notifications } satisfies WorkspaceData };
+  return { tenantId, identity, data: { clients, services, appointments, messages, notifications, paymentSettings: (paymentSettingsResult.data ?? []).map(mapPaymentSettings), paymentSubmissions: (paymentSubmissionsResult.data ?? []).map(mapPaymentSubmission) } satisfies WorkspaceData };
 }
 
 function mapNotification(row: { id: string; tenant_id: string; appointment_id: string; client_id: string; notification_type: string; title: string; body: string; read_at: string | null; created_at: string }) {
-  return { id: row.id, tenantId: row.tenant_id, appointmentId: row.appointment_id, clientId: row.client_id, type: row.notification_type === "payment_confirmed" ? "payment_confirmed" : "payment_pending", title: row.title, body: row.body, readAt: row.read_at, createdAt: row.created_at } satisfies AppointmentNotification;
+  const knownTypes: AppointmentNotificationType[] = ["appointment_created", "payment_pending", "receipt_submitted", "payment_confirmed"];
+  const type = knownTypes.includes(row.notification_type as AppointmentNotificationType) ? row.notification_type as AppointmentNotificationType : "payment_pending";
+  return { id: row.id, tenantId: row.tenant_id, appointmentId: row.appointment_id, clientId: row.client_id, type, title: row.title, body: row.body, readAt: row.read_at, createdAt: row.created_at } satisfies AppointmentNotification;
+}
+
+function mapPaymentSettings(row: { tenant_id: string; pix_key: string; updated_at: string | null }) {
+  return { tenantId: row.tenant_id, pixKey: row.pix_key, updatedAt: row.updated_at } satisfies TenantPaymentSettings;
+}
+
+function mapPaymentSubmission(row: { id: string; tenant_id: string; appointment_id: string; client_id: string; payment_method: string; receipt_path: string | null; receipt_original_name: string | null; receipt_content_type: string | null; receipt_size_bytes: number | null; status: string; created_at: string; updated_at: string }) {
+  return { id: row.id, tenantId: row.tenant_id, appointmentId: row.appointment_id, clientId: row.client_id, paymentMethod: "pix", receiptPath: row.receipt_path ?? "", receiptOriginalName: row.receipt_original_name ?? "comprovante", receiptContentType: row.receipt_content_type as PaymentSubmission["receiptContentType"], receiptSizeBytes: row.receipt_size_bytes ?? 0, status: row.status as PaymentSubmission["status"], createdAt: row.created_at, updatedAt: row.updated_at } satisfies PaymentSubmission;
 }
 
 export async function sendOnlineMessage(tenantId: string, clientId: string, body: string) {
@@ -280,6 +298,72 @@ export async function confirmOnlineAppointmentPayment(appointmentId: string, ten
   const { data, error } = await api.from("appointments").update({ payment_status: "paid", updated_at: new Date().toISOString() }).eq("id", appointmentId).eq("tenant_id", tenantId).eq("payment_status", "pending").select("id").maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("O pagamento já foi confirmado ou o agendamento não está disponível.");
+  try {
+    const { data: delivery, error: deliveryError } = await api.functions.invoke("agenda-whatsapp-payment-confirmed", { body: { appointmentId } });
+    if (deliveryError) return { whatsappSent: false, whatsappReason: deliveryError.message };
+    return { whatsappSent: delivery?.sent === true, whatsappReason: typeof delivery?.reason === "string" ? delivery.reason : undefined };
+  } catch (deliveryError) {
+    return { whatsappSent: false, whatsappReason: deliveryError instanceof Error ? deliveryError.message : "Falha no envio automático." };
+  }
+}
+
+export async function saveOnlinePixKey(tenantId: string, pixKey: string) {
+  const cleanKey = pixKey.trim();
+  if (cleanKey.length > 180) throw new Error("A chave PIX deve ter no máximo 180 caracteres.");
+  const { error } = await client().from("tenant_payment_settings").upsert({ tenant_id: tenantId, pix_key: cleanKey, card_checkout_url: "", updated_at: new Date().toISOString() }, { onConflict: "tenant_id" });
+  if (error) throw error;
+}
+
+const receiptTypes = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
+
+export async function uploadOnlinePixReceipt(appointment: Appointment, clientId: string, file: File) {
+  if (!receiptTypes.has(file.type)) throw new Error("Envie uma imagem JPG, PNG, WebP ou um PDF.");
+  if (file.size < 1 || file.size > 5 * 1024 * 1024) throw new Error("O comprovante deve ter no máximo 5 MB.");
+  const api = client();
+  const { data: userData, error: userError } = await api.auth.getUser();
+  if (userError || !userData.user) throw userError ?? new Error("Sessão não encontrada.");
+  const safeName = file.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-").slice(-100) || "comprovante";
+  const receiptPath = `${appointment.tenantId}/${appointment.id}/${userData.user.id}/${crypto.randomUUID()}-${safeName}`;
+  const upload = await api.storage.from("appointment-payment-receipts").upload(receiptPath, file, { cacheControl: "3600", contentType: file.type, upsert: false });
+  if (upload.error) throw upload.error;
+  const submissionId = crypto.randomUUID();
+  const { error } = await api.from("appointment_payment_submissions").insert({
+    id: submissionId,
+    tenant_id: appointment.tenantId,
+    appointment_id: appointment.id,
+    client_id: clientId,
+    submitted_by_user_id: userData.user.id,
+    payment_method: "pix",
+    receipt_path: receiptPath,
+    receipt_original_name: file.name.slice(0, 255),
+    receipt_content_type: file.type,
+    receipt_size_bytes: file.size,
+    status: "submitted",
+  });
+  if (error) {
+    await api.storage.from("appointment-payment-receipts").remove([receiptPath]);
+    throw error;
+  }
+  return {
+    id: submissionId,
+    tenantId: appointment.tenantId,
+    appointmentId: appointment.id,
+    clientId,
+    paymentMethod: "pix",
+    receiptPath,
+    receiptOriginalName: file.name.slice(0, 255),
+    receiptContentType: file.type as PaymentSubmission["receiptContentType"],
+    receiptSizeBytes: file.size,
+    status: "submitted",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  } satisfies PaymentSubmission;
+}
+
+export async function onlinePaymentReceiptUrl(receiptPath: string) {
+  const { data, error } = await client().storage.from("appointment-payment-receipts").createSignedUrl(receiptPath, 300);
+  if (error || !data?.signedUrl) throw error ?? new Error("Não foi possível abrir o comprovante.");
+  return data.signedUrl;
 }
 
 export async function saveOnlineClient(record: Client, exists: boolean) {

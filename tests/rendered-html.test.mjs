@@ -287,12 +287,19 @@ test("oferece suporte interno e chat multitenant com notificações", async () =
 test("automatiza alertas de agendamento e confirmação manual de pagamento", async () => {
   const systemSource = await readFile(new URL("../app/sistema/client.tsx", import.meta.url), "utf8");
   const alertsSource = await readFile(new URL("../app/sistema/appointment-alerts.tsx", import.meta.url), "utf8");
+  const pixSource = await readFile(new URL("../app/sistema/pix-payments.tsx", import.meta.url), "utf8");
   const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
   const migrationSource = await readFile(new URL("../supabase/migrations/20260827135758_add_appointment_payment_notifications.sql", import.meta.url), "utf8");
-  assert.match(systemSource, /Confirmar pagamento/);
-  assert.match(systemSource, /Pagamento confirmado e cliente notificado/);
+  const pixMigrationSource = await readFile(new URL("../supabase/migrations/20260901121711_complete_pix_receipt_notifications.sql", import.meta.url), "utf8");
+  assert.match(pixSource, /Confirmar recebimento/);
+  assert.match(systemSource, /Cliente notificado no sistema e no WhatsApp/);
+  assert.match(pixSource, /Gerenciamento PIX/);
+  assert.match(pixSource, /Enviar comprovante PIX/);
+  assert.match(pixSource, /O Agenda Profissa não recebe nem retém o valor/);
   assert.match(alertsSource, /Alertas de agendamentos/);
   assert.match(authSource, /confirmOnlineAppointmentPayment/);
+  assert.match(authSource, /uploadOnlinePixReceipt/);
+  assert.match(authSource, /createSignedUrl/);
   assert.match(authSource, /markOnlineNotificationRead/);
   assert.match(migrationSource, /create table public\.appointment_notifications/);
   assert.match(migrationSource, /alter table public\.appointment_notifications enable row level security/);
@@ -301,6 +308,8 @@ test("automatiza alertas de agendamento e confirmação manual de pagamento", as
   assert.match(migrationSource, /Novo agendamento — pagamento pendente/);
   assert.match(migrationSource, /Pagamento confirmado — horário reservado/);
   assert.doesNotMatch(migrationSource, /grant insert on public\.appointment_notifications to authenticated/i);
+  assert.match(pixMigrationSource, /require_pix_receipt_before_confirmation/);
+  assert.match(pixMigrationSource, /receipt_submitted/);
 });
 
 test("destaca o WhatsApp na landing e prepara mensagens contextuais na agenda", async () => {

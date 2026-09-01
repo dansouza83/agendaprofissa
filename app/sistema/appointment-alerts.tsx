@@ -13,11 +13,11 @@ export function AppointmentAlerts({ notifications, onRead }: { notifications: Ap
     <div className="border-b border-[#e3eae6] p-5">
       <p className="eyebrow">Atualizações automáticas</p>
       <h2 className="mt-1 text-xl font-extrabold">Alertas de agendamentos</h2>
-      <p className="mt-1 text-sm text-[#687570]">Acompanhe solicitações pendentes e confirmações de pagamento.</p>
+      <p className="mt-1 text-sm text-[#687570]">Acompanhe novos horários, comprovantes recebidos e confirmações de pagamento.</p>
     </div>
     <div className="divide-y divide-[#e6ece8]" aria-live="polite">
-      {notifications.map((notification) => <article key={notification.id} className={`flex gap-3 p-4 sm:p-5 ${notification.readAt ? "bg-white" : "bg-[#edf8f3]"}`}>
-        <span className={`grid h-10 w-10 flex-none place-items-center rounded-xl text-lg ${notification.type === "payment_confirmed" ? "bg-[#dff3e9] text-[#176b55]" : "bg-[#fff2d7] text-[#8a5a00]"}`} aria-hidden="true">{notification.type === "payment_confirmed" ? "✓" : "◷"}</span>
+      {notifications.map((notification) => {const confirmed=notification.type==="payment_confirmed",receipt=notification.type==="receipt_submitted";return <article key={notification.id} className={`flex gap-3 p-4 sm:p-5 ${notification.readAt ? "bg-white" : "bg-[#edf8f3]"}`}>
+        <span className={`grid h-10 w-10 flex-none place-items-center rounded-xl text-lg ${confirmed ? "bg-[#dff3e9] text-[#176b55]" : receipt ? "bg-[#e5eefc] text-[#285b92]" : "bg-[#fff2d7] text-[#8a5a00]"}`} aria-hidden="true">{confirmed ? "✓" : receipt ? "▧" : "◷"}</span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h3 className="font-extrabold text-[#183d34]">{notification.title}</h3>
@@ -26,7 +26,7 @@ export function AppointmentAlerts({ notifications, onRead }: { notifications: Ap
           <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#4f625b]">{notification.body}</p>
           {!notification.readAt && <button type="button" className="mt-2 text-xs font-extrabold text-[#24685d] underline-offset-4 hover:underline" onClick={() => onRead(notification.id)}>Marcar como lido</button>}
         </div>
-      </article>)}
+      </article>})}
     </div>
   </section>;
 }
