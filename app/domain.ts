@@ -1,11 +1,12 @@
 export type Status = "confirmado" | "pendente" | "concluido" | "cancelado";
 export type Client = { id: string; tenantId: string; userId?: string; businessName?: string; name: string; phone: string; email: string; notes: string };
 export type Service = { id: string; tenantId: string; name: string; duration: number; price: number; color: string; active: boolean };
-export type Appointment = { id: string; tenantId: string; clientId: string; serviceId: string; date: string; time: string; status: Status; notes: string; paymentStatus: "paid" | "pending"; paymentConfirmedAt?: string | null };
+export type Appointment = { id: string; tenantId: string; clientId: string; serviceId: string; date: string; time: string; status: Status; notes: string; amountCents?: number | null; paymentStatus: "paid" | "pending"; paymentConfirmedAt?: string | null };
 export type ChatMessage = { id: string; tenantId: string; clientId: string; senderUserId: string; body: string; createdAt: string; readAt: string | null; mine: boolean };
-export type AppointmentNotificationType = "appointment_created" | "payment_pending" | "receipt_submitted" | "payment_confirmed";
+export type AppointmentNotificationType = "appointment_created" | "payment_pending" | "receipt_submitted" | "receipt_rejected" | "payment_confirmed";
 export type AppointmentNotification = { id: string; tenantId: string; appointmentId: string; clientId: string; type: AppointmentNotificationType; title: string; body: string; createdAt: string; readAt: string | null };
-export type TenantPaymentSettings = { tenantId: string; pixKey: string; updatedAt: string | null };
+export type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "random";
+export type TenantPaymentSettings = { tenantId: string; pixKey: string; pixKeyType?: PixKeyType | ""; pixHolderName?: string; pixHolderCity?: string; updatedAt: string | null };
 export type PaymentSubmissionStatus = "submitted" | "confirmed" | "rejected";
 export type PaymentSubmission = {
   id: string;
@@ -18,6 +19,10 @@ export type PaymentSubmission = {
   receiptContentType: "image/jpeg" | "image/png" | "image/webp" | "application/pdf";
   receiptSizeBytes: number;
   status: PaymentSubmissionStatus;
+  reviewStartedAt?: string | null;
+  reviewedAt?: string | null;
+  reviewedByName?: string | null;
+  rejectionReason?: string | null;
   createdAt: string;
   updatedAt: string;
 };

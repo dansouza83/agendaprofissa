@@ -349,3 +349,10 @@ test("prioriza a demonstração mobile e permite alternar para a versão web", a
   assert.match(previewSource, /Teste rápido:/);
   assert.match(previewSource, /toque nos menus do celular/);
 });
+
+test("usa cursor de ação em controles clicáveis e preserva cursor de texto nos campos", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /a\[href\][\s\S]*button[\s\S]*summary[\s\S]*\[role="button"\][\s\S]*cursor:\s*pointer/);
+  assert.match(styles, /\[aria-disabled="true"\][\s\S]*cursor:\s*not-allowed/);
+  assert.match(styles, /input:not\(\[type="button"\]\)[\s\S]*textarea[\s\S]*cursor:\s*text/);
+});

@@ -1,4 +1,49 @@
 @import "tailwindcss";
+/* PIX: compact, theme-aware payment flow; QR remains black on white for scanning. */
+.pix-panel, .pix-management {
+  --pix-surface: #f4f8f6;
+  --pix-border: #cbdcd3;
+  --pix-muted: #435b51;
+  --pix-accent: #176b55;
+  --pix-accent-bg: #e3f3ec;
+}
+.dark .pix-panel, .dark .pix-management {
+  --pix-surface: #0c1c16;
+  --pix-border: #39564a;
+  --pix-muted: #b3cbc1;
+  --pix-accent: #91e1c7;
+  --pix-accent-bg: #193b2f;
+}
+.pix-panel { padding: 1.1rem; border-top: 1px solid var(--pix-border); background: var(--pix-surface); }
+.pix-muted { color: var(--pix-muted); font-size: .8rem; line-height: 1.65; }
+.pix-timeline { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem .75rem; padding: 0; margin: 0 0 1.25rem; list-style: none; }
+.pix-timeline li { display: flex; align-items: flex-start; gap: .5rem; color: var(--pix-muted); font-size: .75rem; line-height: 1.45; }
+.pix-timeline small { display: block; margin-top: .25rem; }
+.pix-step { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border: 1px solid var(--pix-border); border-radius: 50%; font-weight: 800; }
+.pix-timeline .is-reached .pix-step { border-color: var(--pix-accent); color: var(--pix-accent); background: var(--pix-accent-bg); }
+.pix-timeline [aria-current="step"] .pix-step { outline: 2px solid var(--pix-accent); outline-offset: 2px; }
+.pix-checkout { display: flex; flex-wrap: wrap; align-items: center; gap: 1.1rem; }
+.pix-checkout > div:last-child { flex-basis: 200px; }
+.pix-qr { display: grid; justify-items: center; flex: none; width: 208px; padding: 8px; border-radius: 16px; background: #fff; color: #263d33; }
+.pix-qr svg { display: block; width: 192px; max-width: 100%; height: auto; }
+.pix-qr span { font-size: .7rem; text-align: center; padding: 0 4px 8px; }
+.pix-amount { font-size: 1.65rem; font-weight: 800; letter-spacing: -.035em; margin: .35rem 0; }
+.pix-notice { padding: .85rem; border: 1px solid var(--pix-border); border-radius: 12px; background: var(--pix-accent-bg); color: var(--pix-accent); font-size: .85rem; line-height: 1.6; }
+.pix-notice p + p { margin-top: .35rem; }
+.pix-warning { background: #fff2d6; color: #614400; border-color: #d9b96f; }
+.dark .pix-warning { background: #342a16; color: #f3d799; border-color: #6e592b; }
+.pix-upload, .pix-review-list { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--pix-border); }
+.pix-upload input::file-selector-button { padding: .45rem .65rem; margin-right: .6rem; border: 0; border-radius: 8px; background: var(--pix-accent-bg); color: var(--pix-accent); font-weight: 700; cursor: pointer; }
+.pix-history { margin-top: .85rem; font-size: .8rem; }
+.pix-history summary { color: var(--pix-accent); font-weight: 750; padding: .5rem 0; cursor: pointer; }
+.pix-history ul { margin-top: .5rem; display: grid; gap: .5rem; }
+.pix-history li { padding: .7rem; border-left: 2px solid var(--pix-border); overflow-wrap: anywhere; }
+.pix-history li span { display: block; color: var(--pix-muted); margin-top: .25rem; }
+.pix-count { border: 1px solid var(--pix-border); background: var(--pix-accent-bg); color: var(--pix-accent); padding: .3rem .7rem; border-radius: 999px; font-size: .75rem; font-weight: 750; }
+.pix-receipt { background: var(--pix-surface); border: 1px solid var(--pix-border); padding: 1rem; border-radius: 14px; }
+.pix-request-form { margin-top: 1rem; padding-top: .85rem; border-top: 1px solid var(--pix-border); }
+.pix-panel :is(button, a, summary):focus-visible, .pix-management :is(button, a, summary):focus-visible { outline: 2px solid var(--pix-accent); outline-offset: 3px; }
+@media (min-width: 640px) { .pix-timeline { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* Tema claro/escuro global. O modo escuro é o padrão inicial. */
 .theme-toggle {
   display: inline-grid;
@@ -711,8 +756,35 @@ select,
 textarea {
   font: inherit;
 }
-button {
+:where(
+  a[href],
+  area[href],
+  button,
+  summary,
+  select,
+  label[for],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="file"],
+  [role="button"],
+  [role="link"],
+  [role="tab"]
+) {
   cursor: pointer;
+}
+:where(button, input, select)[disabled],
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+:where(
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  textarea,
+  [contenteditable="true"]
+) {
+  cursor: text;
 }
 .card {
   border: 1px solid var(--line);
