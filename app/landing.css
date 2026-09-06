@@ -684,28 +684,17 @@ html {
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(180deg, #0208060d 30%, #0208063d 62%, #020806a8 100%),
-    linear-gradient(90deg, #02080624 0%, transparent 72%);
+    linear-gradient(180deg, transparent 20%, #02080626 43%, #020806c2 72%, #010503fa 100%),
+    linear-gradient(90deg, #02080638 0%, transparent 72%);
 }
 .segment-content {
   position: absolute;
-  right: 0.85rem;
-  bottom: 0.85rem;
-  left: 0.85rem;
-  overflow: hidden;
-  border: 1px solid #ffffff38;
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at 8% 0%, #79cfb929 0, transparent 42%),
-    linear-gradient(135deg, #071a14f2 0%, #06120eeb 62%, #030a08f5 100%);
-  padding: 1.15rem 1.25rem 1.2rem;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1.65rem;
   color: #fff;
-  box-shadow:
-    0 16px 36px #00000052,
-    inset 0 1px #ffffff1f;
-  -webkit-backdrop-filter: blur(10px) saturate(0.9);
-  backdrop-filter: blur(10px) saturate(0.9);
-  text-shadow: 0 1px 6px #000;
+  text-shadow: 0 2px 12px #000000e6, 0 1px 2px #000;
 }
 .segment-content span {
   font-size: 0.66rem;
@@ -1173,12 +1162,13 @@ html:not(.dark) .landing [class*="text-[#64756f]"] {
     grid-column: auto;
     border-radius: 22px;
   }
+  #segmentos .segment-shade {
+    background:
+      linear-gradient(180deg, #0208065c 0%, #020806d6 48%, #010503fa 100%),
+      linear-gradient(90deg, #02080642 0%, transparent 78%);
+  }
   #segmentos .segment-content {
-    right: 0.55rem;
-    bottom: 0.55rem;
-    left: 0.55rem;
-    border-radius: 14px;
-    padding: 0.7rem 0.8rem 0.75rem;
+    padding: 1.15rem;
   }
   #segmentos .segment-content h3 {
     font-size: 1.35rem;
