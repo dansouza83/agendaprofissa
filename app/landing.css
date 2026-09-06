@@ -683,12 +683,9 @@ html {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(
-    180deg,
-    transparent 25%,
-    #0b181458 56%,
-    #07110de8 100%
-  );
+  background:
+    linear-gradient(180deg, #02080670 18%, #020806dc 49%, #020806f5 78%, #010503fc 100%),
+    linear-gradient(90deg, #02080647 0%, transparent 72%);
 }
 .segment-content {
   position: absolute;
@@ -697,13 +694,14 @@ html {
   left: 0;
   padding: 1.65rem;
   color: #fff;
+  text-shadow: 0 2px 12px #000, 0 1px 2px #000;
 }
 .segment-content span {
   font-size: 0.66rem;
   font-weight: 900;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #9dd9c9;
+  color: #dcfff6;
 }
 .segment-content h3 {
   margin-top: 0.45rem;
@@ -715,8 +713,9 @@ html {
 .segment-content p {
   max-width: 31rem;
   margin-top: 0.5rem;
-  color: #d2e2dc;
+  color: #f0f8f5;
   font-size: 0.86rem;
+  font-weight: 600;
   line-height: 1.55;
 }
 .segment-card:hover .segment-image {
