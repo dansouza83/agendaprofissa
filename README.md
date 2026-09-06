@@ -116,17 +116,9 @@ O Mercado Pago desta seção é usado somente na assinatura do profissional com 
 
 O profissional cadastra sua própria chave PIX no painel. Somente o cliente autenticado e vinculado ao agendamento pode visualizar essa chave. O cliente paga diretamente ao profissional, envia um comprovante privado (JPG, PNG, WebP ou PDF, até 5 MB) e o profissional confirma manualmente apenas depois de conferir a entrada do valor.
 
-Para o aviso automático de pagamento confirmado no WhatsApp, publique a função `agenda-whatsapp-payment-confirmed` e configure como segredos do Supabase:
+O WhatsApp funciona por envio manual, sem API ou credenciais da Meta: em **Agenda → menu ⋯ do agendamento → Enviar atualização no WhatsApp**, o sistema abre a conversa com uma mensagem preenchida com o status atual, serviço, data, horário e nome do negócio. O profissional revisa e toca em **Enviar** no WhatsApp.
 
-- `WHATSAPP_ACCESS_TOKEN`
-- `WHATSAPP_PHONE_NUMBER_ID`
-- `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE`
-- `WHATSAPP_GRAPH_API_VERSION` (opcional; padrão atual do projeto: `v23.0`)
-- `WHATSAPP_TEMPLATE_LANGUAGE` (opcional; padrão: `pt_BR`)
-
-O modelo aprovado no WhatsApp Manager precisa ter seis variáveis no corpo, nesta ordem: nome do cliente, serviço, data, horário, nome do negócio e contato do profissional. Exemplo: `Olá, {{1}}! O pagamento de {{2}} foi confirmado. Horário: {{3}} às {{4}}. Atendimento: {{5}}. Contato: {{6}}.`
-
-Sem essas credenciais, a confirmação e a notificação interna continuam funcionando; somente o envio automático pelo WhatsApp permanece desativado. Chaves do WhatsApp nunca devem usar o prefixo `NEXT_PUBLIC_`.
+A confirmação do PIX registra o recebimento e gera a notificação interna, mas não dispara mensagens externas. Abrir a conversa não significa que a mensagem foi enviada ou entregue. A função legada `agenda-whatsapp-payment-confirmed` não é mais chamada pelo aplicativo.
 
 ## Publicação
 

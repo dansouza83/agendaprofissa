@@ -1,3 +1,5 @@
+import { subscriptionPrices } from "../../../lib/subscription-plans";
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
 
@@ -7,7 +9,7 @@ export const revalidate = 0;
 export async function GET() {
   if (!supabaseUrl || !publishableKey) {
     return Response.json(
-      { monthlyPrice: 50, annualPrice: 350, currency: "BRL" },
+      { monthlyPrice: subscriptionPrices.monthly, annualPrice: subscriptionPrices.annual, currency: "BRL" },
       { headers: { "Cache-Control": "no-store" } },
     );
   }

@@ -722,6 +722,50 @@ html {
 .segment-card:hover .segment-image {
   transform: scale(1.04);
 }
+.segment-card-educator {
+  border-color: #9dd9c9aa;
+  box-shadow: 0 18px 46px #173f3730, inset 0 0 0 1px #9dd9c955;
+}
+.educator-tribute {
+  display: grid;
+  grid-template-columns: auto minmax(0, 0.9fr) minmax(0, 1.35fr);
+  align-items: center;
+  gap: 1.1rem;
+  border: 1px solid #bcd8cc;
+  border-radius: 22px;
+  background: linear-gradient(115deg, #dcefe7, #f7fbf8);
+  padding: 1.15rem 1.35rem;
+  color: #173f37;
+  box-shadow: 0 12px 30px #173f3712;
+}
+.educator-tribute-mark {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 15px;
+  background: #247466;
+  color: #fff;
+  font-size: 1.4rem;
+}
+.educator-tribute div > p {
+  color: #2b7467;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.educator-tribute h3 {
+  margin-top: 0.2rem;
+  font-size: 1.08rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+.educator-tribute > p {
+  color: #506860;
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
 .pricing-value-grid {
   display: grid;
   gap: 0.75rem;
@@ -880,9 +924,8 @@ html {
   .segment-card {
     height: 310px;
   }
-  .segment-card-5 {
-    grid-column: span 2;
-  }
+  .educator-tribute { grid-template-columns: auto minmax(0, 1fr); }
+  .educator-tribute > p { grid-column: 2; }
   .pricing-card {
     padding: 2rem;
   }
@@ -907,6 +950,7 @@ html {
   .segment-card-5 {
     grid-column: span 2;
   }
+  .segment-card-6 { grid-column: span 6; }
   .segment-content {
     padding: 2rem;
   }
@@ -1111,15 +1155,13 @@ html:not(.dark) .landing [class*="text-[#64756f]"] {
     font-size: clamp(2rem, 3.5vw, 2.7rem);
   }
   #segmentos .segment-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     margin-top: 1.5rem;
   }
   #segmentos .segment-card {
     height: 130px;
+    grid-column: auto;
     border-radius: 22px;
-  }
-  #segmentos .segment-card-1,
-  #segmentos .segment-card-2 {
-    height: 170px;
   }
   #segmentos .segment-content {
     padding: 1.15rem;
@@ -1819,6 +1861,19 @@ html:not(.dark) .landing [class*="text-[#64756f]"] {
       var(--surface-green-deep) 58%,
       #0a1d16 100%
     );
+}
+.dark .educator-tribute {
+  border-color: #3f6b5c;
+  background: linear-gradient(115deg, #15352b, #101b18);
+  color: #eef8f4;
+  box-shadow: 0 14px 34px #0006;
+}
+.dark .educator-tribute-mark { background: #84d4be; color: #0b211a; }
+.dark .educator-tribute div > p { color: #99dfcc; }
+.dark .educator-tribute > p { color: #c2d7d0; }
+@media (max-width: 639px) {
+  .educator-tribute { grid-template-columns: auto minmax(0, 1fr); padding: 1rem; }
+  .educator-tribute > p { grid-column: 1 / -1; }
 }
 .dark #recursos {
   background:

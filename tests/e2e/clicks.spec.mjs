@@ -119,9 +119,9 @@ test("todos os links de ação da landing page abrem a tela correta", async ({ p
 test("landing apresenta os preços ativos e o benefício do plano anual", async ({ page }) => {
   await page.goto("/#planos");
   const plans = page.locator("#planos");
-  await expect(plans.getByText("R$ 50,00", { exact: true })).toBeVisible();
+  await expect(plans.getByText("R$ 35,00", { exact: true })).toBeVisible();
   await expect(plans.getByText("R$ 350,00", { exact: true })).toBeVisible();
-  await expect(plans.getByText("Economize R$ 250,00 por ano (42%)", { exact: true })).toBeVisible();
+  await expect(plans.getByText("Economize R$ 70,00 por ano (17%)", { exact: true })).toBeVisible();
   await expect(plans.getByText("Melhor custo-benefício", { exact: true })).toBeVisible();
   await expect(plans.getByRole("link", { name: /Criar conta profissional/ })).toHaveCount(2);
 });

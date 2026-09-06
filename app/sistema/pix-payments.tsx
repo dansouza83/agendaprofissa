@@ -36,14 +36,17 @@ function ReceiptHistory({ receipts }: { receipts: PaymentSubmission[] }) {
   </details>;
 }
 
-export function ClientPixPayment({ appointment, client, service, settings, submissions, online, onSubmitted }: {
+export function ClientPixPayment({ appointment, client, service, settings: providedSettings, submissions, online, onSubmitted }: {
   appointment: Appointment; client: Client; service?: Service; settings?: TenantPaymentSettings;
   submissions: PaymentSubmission[]; online: boolean; onSubmitted: (submission: PaymentSubmission) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-  const receipts = submissions.filter(item => item.appointmentId === appointment.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  // Defense in depth: never display a different business's PIX, even with stale UI data.
+  // The database RLS remains the authorization boundary.
+  const settings = providedSettings?.tenantId === appointment.tenantId ? providedSettings : undefined;
+  const receipts = submissions.filter(item => item.appointmentId === appointment.id && item.tenantId === appointment.tenantId && item.clientId === appointment.clientId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const receipt = receipts[0];
   const paid = appointment.paymentStatus === "paid";
   const waiting = !paid && receipt?.status === "submitted";
@@ -114,7 +117,7 @@ export function ClientPixPayment({ appointment, client, service, settings, submi
         </div>}
       </>}
     <ReceiptHistory receipts={receipts} />
-    <p className="pix-muted mt-3">O Agenda Profissa não recebe nem retém o valor deste atendimento. A conferência e a confirmação são feitas pelo profissional.</p>
+    <p className="pix-muted mt-3">100% do valor deste atendimento é pago diretamente ao profissional. O Agenda Profissa não recebe, retém ou cobra comissão sobre esse valor. A conferência e a confirmação são feitas pelo profissional.</p>
     {message && <p className="pix-notice mt-3" role="status">{message}</p>}
   </section>;
 }
@@ -180,7 +183,7 @@ export function ProfessionalPixManagement({ data, tenantId, online, onData, onRe
   return <section className="card pix-management p-5 lg:col-span-2" aria-labelledby="pix-management-title">
     <p className="eyebrow">Recebimentos dos seus clientes</p>
     <h3 id="pix-management-title" className="mt-1 text-xl font-extrabold">Gerenciamento PIX</h3>
-    <p className="pix-muted mt-2">O pagamento vai diretamente para sua conta. Estes dados aparecem somente aos clientes vinculados a um agendamento.</p>
+    <p className="pix-muted mt-2">O pagamento vai diretamente para sua conta, sem comissão do Agenda Profissa. Estes dados aparecem somente aos seus clientes cadastrados, vinculados a um agendamento. Esta chave não paga sua assinatura do sistema.</p>
     <form className="mt-5 grid gap-3 sm:grid-cols-2" onSubmit={event => { event.preventDefault(); void save(); }}>
       <label className="label">Tipo de chave
         <select className="input" value={settings.pixKeyType ?? ""} onChange={event => setField("pixKeyType", event.target.value as PixKeyType)}>

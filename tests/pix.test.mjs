@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
 import { buildPixPayload, normalizePixKey, pixCrc16, pixPaymentStage, validatePixReceipt, validatePixSettings } from "../app/lib/pix.ts";
+import { appointmentWhatsAppUrl } from "../app/lib/whatsapp.ts";
 
 const settings = { tenantId: "test", pixKey: "123e4567-e12b-12d1-a456-426655440000", pixKeyType: "random", pixHolderName: "Fulano de Tal", pixHolderCity: "BRASILIA", updatedAt: null };
 function fields(payload) {
@@ -84,4 +85,45 @@ test("PIX text and status colors meet 4.5:1 in light and dark themes", () => {
 test("regular appointment edits cannot reset payment status", async () => {
   const source = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
   assert.doesNotMatch(source.slice(source.indexOf("export async function saveOnlineAppointment")), /payment_status:/);
+});
+
+test("receipt upload policy uses the Storage path, never the client name", async () => {
+  const sql = await readFile(new URL("../supabase/migrations/20260903112338_fix_payment_receipt_upload_policy.sql", import.meta.url), "utf8");
+  assert.doesNotMatch(sql, /storage\.foldername\((?:name|c\.name)\)/);
+  assert.match(sql, /a\.tenant_id::text = \(storage\.foldername\(storage\.objects\.name\)\)\[1\]/);
+  assert.match(sql, /a\.id::text = \(storage\.foldername\(storage\.objects\.name\)\)\[2\]/);
+  assert.match(sql, /\[3\] = \(select auth\.uid\(\)::text\)/);
+  assert.match(sql, /c\.user_id = \(select auth\.uid\(\)\)/);
+  assert.match(sql, /a\.payment_status = 'pending'/);
+  assert.match(sql, /a\.status <> 'cancelado'/);
+});
+
+test("orphan receipt cleanup keeps owner and participant access checks", async () => {
+  const sql = await readFile(new URL("../supabase/migrations/20260903112936_fix_orphan_receipt_cleanup.sql", import.meta.url), "utf8");
+  assert.match(sql, /bucket_id = 'appointment-payment-receipts'/);
+  assert.match(sql, /owner_id = \(select auth\.uid\(\)::text\)\s+and not exists/);
+  assert.match(sql, /orphan_check\.receipt_path = storage\.objects\.name/);
+  assert.match(sql, /private\.has_active_subscription\(s\.tenant_id\)/);
+  assert.match(sql, /m\.user_id = \(select auth\.uid\(\)\)/);
+  assert.match(sql, /c\.user_id = \(select auth\.uid\(\)\)/);
+  assert.doesNotMatch(sql, /for delete|disable row level security|security definer/i);
+});
+
+test("manual WhatsApp links preserve recipient, schedule and pending status", () => {
+  const link = new URL(appointmentWhatsAppUrl({ phone: "(11) 99999-9999", clientName: "João Silva", serviceName: "Pilates & mobilidade", date: "2026-09-03", time: "14:30", paymentStatus: "pending", businessName: "Studio Teste" }));
+  assert.equal(link.origin, "https://wa.me");
+  assert.equal(link.pathname, "/5511999999999");
+  assert.deepEqual([...link.searchParams.keys()], ["text"]);
+  const message = link.searchParams.get("text");
+  for (const text of ["João", "Pilates & mobilidade", "03/09/2026", "14:30", "Studio Teste", "O pagamento ainda está pendente de confirmação"]) assert.ok(message.includes(text));
+  assert.doesNotMatch(message, /pagamento foi confirmado/);
+});
+
+test("manual WhatsApp confirmation uses paid status and rejects a missing phone", () => {
+  const input = { phone: "+55 11 99999-9999", clientName: "Cliente", serviceName: "Atendimento", date: "2026-09-03", time: "14:30", paymentStatus: "paid", businessName: "Studio Teste" };
+  const message = new URL(appointmentWhatsAppUrl(input)).searchParams.get("text");
+  assert.match(message, /Seu pagamento foi confirmado/);
+  assert.doesNotMatch(message, /pagamento ainda está pendente/);
+  assert.equal(appointmentWhatsAppUrl({ ...input, phone: "" }), null);
+  assert.equal(appointmentWhatsAppUrl({ ...input, phone: "sem telefone" }), null);
 });

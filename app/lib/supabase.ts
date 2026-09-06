@@ -1,5 +1,6 @@
 import { createClient, type AuthChangeEvent, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { validatePixSettings, validatePixReceipt } from "./pix";
+import { subscriptionPrices } from "./subscription-plans";
 import type { Appointment, AppointmentNotification, AppointmentNotificationType, ChatMessage, Client, Identity, PaymentSubmission, Service, TenantPaymentSettings, WorkspaceData } from "../domain";
 
 export type AccountType = "professional" | "client";
@@ -170,7 +171,7 @@ async function billingRequest(path: string, init?: RequestInit) {
 
 export async function subscriptionStatus() {
   const result = await billingRequest("/api/billing/status");
-  return { active: Boolean(result.active), prices: result.prices ?? { monthly: 50, annual: 350 } };
+  return { active: Boolean(result.active), prices: result.prices ?? subscriptionPrices };
 }
 
 export async function startSubscriptionCheckout(plan: "monthly" | "annual") {
@@ -299,13 +300,8 @@ export async function confirmOnlineAppointmentPayment(appointmentId: string, ten
   const { data, error } = await api.from("appointments").update({ payment_status: "paid", updated_at: new Date().toISOString() }).eq("id", appointmentId).eq("tenant_id", tenantId).eq("payment_status", "pending").select("id").maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("O pagamento já foi confirmado ou o agendamento não está disponível.");
-  try {
-    const { data: delivery, error: deliveryError } = await api.functions.invoke("agenda-whatsapp-payment-confirmed", { body: { appointmentId } });
-    if (deliveryError) return { whatsappSent: false, whatsappReason: deliveryError.message };
-    return { whatsappSent: delivery?.sent === true, whatsappReason: typeof delivery?.reason === "string" ? delivery.reason : undefined };
-  } catch (deliveryError) {
-    return { whatsappSent: false, whatsappReason: deliveryError instanceof Error ? deliveryError.message : "Falha no envio automático." };
-  }
+  // Internal notifications are created by the database. WhatsApp is sent manually
+  // through the appointment's link; confirming payment must never send a message.
 }
 
 export async function saveOnlinePixSettings(settings: TenantPaymentSettings) {

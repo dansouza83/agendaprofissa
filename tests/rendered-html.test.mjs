@@ -26,6 +26,14 @@ test("renderiza a landing page pública em português", async () => {
   assert.match(html, /<html[^>]*class="dark"/);
   assert.match(html, /Alternar entre tema claro e escuro/);
   assert.doesNotMatch(html, /codex-preview/);
+  assert.match(html, /R\$\s*35,00/);
+  assert.match(html, /R\$\s*350,00/);
+  assert.match(html, /Economize R\$\s*70,00 por ano \(17%\)/);
+  assert.match(html, /sem comissão do Agenda Profissa/);
+  assert.match(html, /Professores particulares/);
+  assert.match(html, /Educação que transforma/);
+  assert.match(html, /Para quem ensina hoje e abre caminhos para o amanhã/);
+  assert.match(html, /agenda para professor particular/);
 });
 
 test("renderiza cadastro de profissional e aluno ou cliente", async () => {
@@ -40,7 +48,7 @@ test("renderiza cadastro de profissional e aluno ou cliente", async () => {
   assert.match(source, /Nome do negócio/);
   assert.match(source, /Criar perfil de aluno\/cliente/);
   assert.match(source, /Termos de Uso/);
-  assert.match(source, /monthly:50,annual:350/);
+  assert.match(source, /useState\(subscriptionPrices\)/);
   assert.doesNotMatch(source, /Acesso profissional — assinatura ativa/);
   assert.doesNotMatch(source, /Acesso aluno\/cliente — atendimento pago/);
 });
@@ -49,8 +57,8 @@ test("publica os preços ativos sem expor credenciais do Mercado Pago", async ()
   const pricingSource = await readFile(new URL("../app/public-pricing.tsx", import.meta.url), "utf8");
   const functionSource = await readFile(new URL("../supabase/functions/agenda-public-pricing/index.ts", import.meta.url), "utf8");
   const configSource = await readFile(new URL("../supabase/config.toml", import.meta.url), "utf8");
-  assert.match(pricingSource, /monthlyPrice: 50/);
-  assert.match(pricingSource, /annualPrice: 350/);
+  assert.match(pricingSource, /monthlyPrice: subscriptionPrices.monthly/);
+  assert.match(pricingSource, /annualPrice: subscriptionPrices.annual/);
   assert.match(pricingSource, /Economize/);
   assert.match(functionSource, /monthlyPrice: Number\(current\.monthly_price\)/);
   assert.match(functionSource, /annualPrice: Number\(current\.annual_price\)/);
@@ -284,7 +292,7 @@ test("oferece suporte interno e chat multitenant com notificações", async () =
   assert.doesNotMatch(migrationSource, /grant (all|delete)/i);
 });
 
-test("automatiza alertas de agendamento e confirmação manual de pagamento", async () => {
+test("mantém alertas internos e confirmação de pagamento com WhatsApp manual", async () => {
   const systemSource = await readFile(new URL("../app/sistema/client.tsx", import.meta.url), "utf8");
   const alertsSource = await readFile(new URL("../app/sistema/appointment-alerts.tsx", import.meta.url), "utf8");
   const pixSource = await readFile(new URL("../app/sistema/pix-payments.tsx", import.meta.url), "utf8");
@@ -292,10 +300,13 @@ test("automatiza alertas de agendamento e confirmação manual de pagamento", as
   const migrationSource = await readFile(new URL("../supabase/migrations/20260827135758_add_appointment_payment_notifications.sql", import.meta.url), "utf8");
   const pixMigrationSource = await readFile(new URL("../supabase/migrations/20260901121711_complete_pix_receipt_notifications.sql", import.meta.url), "utf8");
   assert.match(pixSource, /Confirmar recebimento/);
-  assert.match(systemSource, /Cliente notificado no sistema e no WhatsApp/);
+  assert.match(systemSource, /Cliente notificado no sistema\. Para enviar pelo WhatsApp, use o menu do agendamento/);
+  assert.match(systemSource, /O envio pelo WhatsApp é manual/);
+  assert.doesNotMatch(systemSource, /whatsappSent|WhatsApp automático|credenciais oficiais/);
+  assert.doesNotMatch(authSource, /agenda-whatsapp-payment-confirmed/);
   assert.match(pixSource, /Gerenciamento PIX/);
   assert.match(pixSource, /Enviar comprovante PIX/);
-  assert.match(pixSource, /O Agenda Profissa não recebe nem retém o valor/);
+  assert.match(pixSource, /O Agenda Profissa não recebe, retém ou cobra comissão sobre esse valor/);
   assert.match(alertsSource, /Alertas de agendamentos/);
   assert.match(authSource, /confirmOnlineAppointmentPayment/);
   assert.match(authSource, /uploadOnlinePixReceipt/);

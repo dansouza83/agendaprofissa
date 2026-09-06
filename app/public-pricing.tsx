@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { SafeLink as Link } from "./safe-link";
+import { subscriptionPrices } from "./lib/subscription-plans";
 
 type Prices = { monthlyPrice: number; annualPrice: number; currency: "BRL" };
-const initialPrices: Prices = { monthlyPrice: 50, annualPrice: 350, currency: "BRL" };
+const initialPrices: Prices = { monthlyPrice: subscriptionPrices.monthly, annualPrice: subscriptionPrices.annual, currency: "BRL" };
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 export function PublicPricing() {
@@ -30,6 +31,7 @@ export function PublicPricing() {
   }, [prices]);
 
   return <>
+    <p className="mx-auto mt-5 max-w-3xl text-center text-sm leading-6">Planos exclusivos para o profissional usar o Agenda Profissa. O aluno/cliente não paga assinatura à plataforma; o valor dos atendimentos vai diretamente ao profissional, sem comissão do Agenda Profissa.</p>
     <div className="pricing-value-grid mx-auto mt-10 max-w-5xl" aria-label="Benefícios da assinatura">
       <article><strong>Mais organização</strong><span>Agenda, clientes e serviços no mesmo painel.</span></article>
       <article><strong>Mais mobilidade</strong><span>Acesse pelo computador ou pelo celular.</span></article>

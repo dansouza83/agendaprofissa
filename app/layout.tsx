@@ -47,6 +47,7 @@ const structuredData = {
         { "@type": "Audience", audienceType: "Esteticistas e profissionais de beleza" },
         { "@type": "Audience", audienceType: "Cabeleireiros, barbeiros e salões" },
         { "@type": "Audience", audienceType: "Personal trainers e profissionais de bem-estar" },
+        { "@type": "Audience", audienceType: "Professores particulares, tutores e educadores" },
       ],
       featureList: [
         "Agenda de atendimentos",
@@ -63,9 +64,9 @@ const structuredData = {
 export const metadata: Metadata = {
   metadataBase: new URL(metadataSiteUrl),
   title: { default: "Agenda Profissa — Sistema de agendamento para profissionais", template: "%s" },
-  description: "Software de agendamento para esteticistas, salões, personal trainers e profissionais autônomos. Organize agenda, clientes e serviços pelo celular.",
+  description: "Software de agendamento para professores particulares, esteticistas, salões, personal trainers e profissionais autônomos. Organize agenda, alunos, clientes e serviços pelo celular.",
   applicationName: "Agenda Profissa",
-  keywords: ["sistema de agendamento", "agenda online", "agenda para esteticista", "agenda para cabeleireiro", "agenda para personal trainer", "gestão de clientes"],
+  keywords: ["sistema de agendamento", "agenda online", "agenda para professor particular", "agenda de aulas particulares", "gestão de alunos", "agenda para esteticista", "agenda para cabeleireiro", "agenda para personal trainer", "gestão de clientes"],
   alternates: { canonical: "/" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
   verification: googleSiteVerification ? { google: googleSiteVerification } : undefined,

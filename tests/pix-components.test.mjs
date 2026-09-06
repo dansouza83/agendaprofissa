@@ -5,6 +5,32 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
 
+test("confirming payment updates only the appointment and never invokes WhatsApp", async () => {
+  const authSource = await readFile(new URL("../app/lib/supabase.ts", import.meta.url), "utf8");
+  const file = ts.createSourceFile("supabase.ts", authSource, ts.ScriptTarget.Latest, true);
+  const declaration = file.statements.find(node => ts.isFunctionDeclaration(node) && node.name?.text === "confirmOnlineAppointmentPayment");
+  assert.ok(declaration);
+  const code = ts.transpileModule(declaration.getText(file).replace(/^export\s+/, ""), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  const makeConfirm = new Function("client", code + "\nreturn confirmOnlineAppointmentPayment;");
+  for (const result of [{ data: { id: "booking" }, error: null }, { data: null, error: new Error("Falha simulada") }, { data: null, error: null }]) {
+    const filters = []; let functionCalls = 0;
+    const query = {
+      update(values) { assert.equal(values.payment_status, "paid"); return this; },
+      eq(key, value) { filters.push([key, value]); return this; },
+      select(fields) { assert.equal(fields, "id"); return this; },
+      async maybeSingle() { return result; },
+    };
+    const confirm = makeConfirm(() => ({
+      from(table) { assert.equal(table, "appointments"); return query; },
+      functions: { async invoke() { functionCalls++; return { data: { sent: true }, error: null }; } },
+    }));
+    if (result.data) assert.equal(await confirm("booking", "tenant"), undefined);
+    else await assert.rejects(() => confirm("booking", "tenant"), result.error ? /Falha simulada/ : /já foi confirmado/);
+    assert.equal(functionCalls, 0);
+    assert.deepEqual(filters, [["id", "booking"], ["tenant_id", "tenant"], ["payment_status", "pending"]]);
+  }
+});
+
 // Render the real UI without a browser, credentials or remote requests.
 const source = await readFile(new URL("../app/sistema/pix-payments.tsx", import.meta.url), "utf8");
 let js = ts.transpileModule(source, { compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -43,10 +69,18 @@ test("requested replacement preserves reason, prevents duplicate payment and per
   assert.doesNotMatch(html, /<svg|Copiar PIX/);
 });
 test("legacy settings show key fallback rather than an invalid QR", () => {
-  const html = render({ settings: { pixKey: "legacy@example.com" } });
+  const html = render({ settings: { tenantId: "t", pixKey: "legacy@example.com" } });
   assert.match(html, /QR Code indisponível/);
   assert.match(html, /Copiar chave/);
   assert.doesNotMatch(html, /<svg/);
+});
+
+test("client checkout never renders another professional's PIX or receipt", () => {
+  for (const otherSettings of [{ ...settings, tenantId: "other", pixKey: "other-professional@example.com" }, { pixKey: "other-professional@example.com" }]) {
+    const html = render({ settings: otherSettings, submissions: [{ ...receipt, tenantId: "other", receiptOriginalName: "private-other-tenant.pdf" }] });
+    assert.doesNotMatch(html, /other-professional@example.com|private-other-tenant.pdf|Copiar chave|<svg|type="file"/);
+    assert.match(html, /ainda não cadastrou uma chave PIX/);
+  }
 });
 test("professional view shows review controls, statuses and rejection history", () => {
   const data = { clients: [{ id: "c", name: "Cliente" }], services: [{ id: "s", name: "Serviço" }], appointments: [appointment], messages: [], paymentSettings: [settings], paymentSubmissions: [receipt, { ...receipt, id: "old", status: "rejected", rejectionReason: "Arquivo ilegível" }] };

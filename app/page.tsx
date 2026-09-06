@@ -7,7 +7,7 @@ import { DashboardPreview } from "./dashboard-preview";
 
 export const metadata: Metadata = {
   title: "Agenda Profissa — Sistema de agendamento para profissionais",
-  description: "Software de agendamento para esteticistas, salões, personal trainers e profissionais autônomos. Organize agenda, clientes e serviços pelo celular.",
+  description: "Software de agendamento para professores particulares, esteticistas, salões, personal trainers e profissionais autônomos. Organize agenda, alunos, clientes e serviços pelo celular.",
   alternates: { canonical: "/" },
 };
 
@@ -21,6 +21,13 @@ const resources = [
 ];
 
 const segments = [
+  {
+    name: "Professores particulares",
+    image: "/segments/professora-particular.png",
+    text: "Aulas individuais, reforço escolar, idiomas, música e acompanhamento personalizado.",
+    alt: "Professora particular orientando uma aluna durante uma aula individual",
+    featured: true,
+  },
   {
     name: "Estética",
     image: "/segments/estetica.png",
@@ -59,7 +66,7 @@ const faqs = [
   ["Qual é a diferença entre perfil profissional e aluno/cliente?", "O profissional administra agenda, serviços e sua carteira de clientes. O aluno ou cliente usa uma área própria para acompanhar os agendamentos vinculados a ele, sem acesso ao painel do negócio."],
   ["Consigo recuperar minha senha?", "Sim. No ambiente online, o usuário solicita um link de recuperação por e-mail e cria uma nova senha com segurança."],
   ["A senha fica salva no aparelho?", "Não. Ao escolher manter o acesso, o sistema conserva somente uma sessão segura; a senha não é armazenada pelo aplicativo."],
-  ["Como funciona o pagamento?", "O profissional escolhe a cobrança mensal ou anual pelos valores atualizados exibidos na seção Planos. O pagamento recorrente é processado em reais pelo Mercado Pago e o painel é liberado após a confirmação."],
+  ["Como funciona o pagamento?", "O profissional paga a assinatura mensal ou anual do Agenda Profissa pelo Mercado Pago. A escolha do meio de pagamento e a autorização da recorrência acontecem no checkout, conforme disponibilidade. O aluno/cliente não paga assinatura ao Agenda Profissa: paga os atendimentos diretamente ao profissional, pela chave PIX cadastrada por ele. A plataforma não recebe esses valores nem cobra comissão sobre os atendimentos."],
 ];
 
 export default function LandingPage() {
@@ -78,13 +85,13 @@ export default function LandingPage() {
           <div className="landing-hero-grid relative mx-auto grid min-w-0 max-w-7xl items-center gap-10 lg:grid-cols-[.92fr_1.08fr]">
             <div className="landing-hero-copy min-w-0 max-w-2xl" data-reveal="left">
               <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-[#c9ded5] bg-white/80 px-3 py-2 text-xs font-extrabold uppercase tracking-[.14em] text-[#2f7d70] shadow-sm">
-                <span className="h-2 w-2 rounded-full bg-[#e59467]" /> Feito para profissionais que cuidam de pessoas
+                <span className="h-2 w-2 rounded-full bg-[#e59467]" /> Feito para profissionais que cuidam e ensinam
               </span>
               <h1 className="landing-hero-title mt-5 text-4xl font-black leading-[1.02] tracking-[-.055em] text-[#153a32] sm:text-6xl">
                 Sua rotina organizada. Seu atendimento mais humano.
               </h1>
               <p className="landing-hero-description mt-5 max-w-xl text-lg leading-8 text-[#5d7069]">
-                Agenda, clientes e serviços reunidos em uma experiência simples para esteticistas, cabeleireiros, personal trainers e profissionais autônomos.
+                Agenda, alunos, clientes e serviços reunidos em uma experiência simples para professores particulares, esteticistas, cabeleireiros, personal trainers e profissionais autônomos.
               </p>
               <div className="landing-hero-actions mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link className="landing-button landing-button-primary" href="/sistema?cadastro=profissional">Criar perfil profissional <span>→</span></Link>
@@ -101,17 +108,17 @@ export default function LandingPage() {
 
         <section className="landing-trust border-b border-[#e4ece7] bg-white px-4 py-7 sm:px-6">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 text-center md:flex-row md:text-left" data-reveal="up">
-            <p className="max-w-md text-sm font-semibold leading-6 text-[#5c6e68]">Uma única plataforma para negócios de beleza, bem-estar, saúde e treinamento.</p>
-            <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-extrabold text-[#31584f]"><span>Estética</span><span>Salões</span><span>Personal</span><span>Massoterapia</span><span>Bem-estar</span></div>
+            <p className="max-w-md text-sm font-semibold leading-6 text-[#5c6e68]">Uma única plataforma para educação, beleza, bem-estar, saúde e treinamento.</p>
+            <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-extrabold text-[#31584f]"><span>Educação</span><span>Estética</span><span>Salões</span><span>Personal</span><span>Massoterapia</span><span>Bem-estar</span></div>
           </div>
         </section>
 
         <section id="segmentos" className="landing-segments scroll-mt-32 px-4 py-20 sm:px-6 lg:scroll-mt-24 lg:py-28">
           <div className="mx-auto max-w-7xl">
-            <SectionIntro reveal eyebrow="Feito para o seu segmento" title="Uma agenda que entende diferentes formas de cuidar." text="Do primeiro contato ao atendimento concluído, o Agenda Profissa se adapta à rotina de profissionais de beleza, movimento e bem-estar." />
+            <SectionIntro reveal eyebrow="Feito para o seu segmento" title="Uma agenda que entende diferentes formas de cuidar e ensinar." text="Da primeira conversa à aula ou ao atendimento concluído, o Agenda Profissa se adapta à rotina de profissionais de educação, beleza, movimento e bem-estar." />
             <div className="segment-grid mt-12" aria-label="Segmentos atendidos pela plataforma">
               {segments.map((segment, index) => (
-                <article key={segment.name} className={`segment-card segment-card-${index + 1}`} data-reveal={index % 3 === 0 ? "left" : index % 3 === 2 ? "right" : "up"} data-reveal-delay={String(index % 3)}>
+                <article key={segment.name} className={`segment-card segment-card-${index + 1} ${"featured" in segment && segment.featured ? "segment-card-educator" : ""}`} data-reveal={index % 3 === 0 ? "left" : index % 3 === 2 ? "right" : "up"} data-reveal-delay={String(index % 3)}>
                   {/* Imagens locais e estáticas; o elemento nativo evita dependência do otimizador no MVP local. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -125,13 +132,18 @@ export default function LandingPage() {
                   />
                   <div className="segment-shade" aria-hidden="true" />
                   <div className="segment-content">
-                    <span>Para quem atende</span>
+                    <span>{"featured" in segment && segment.featured ? "Educação que transforma" : "Para quem atende"}</span>
                     <h3>{segment.name}</h3>
                     <p>{segment.text}</p>
                   </div>
                 </article>
               ))}
             </div>
+            <aside className="educator-tribute mt-5" data-reveal="up" aria-label="Homenagem aos professores">
+              <span className="educator-tribute-mark" aria-hidden="true">✦</span>
+              <div><p>Nosso reconhecimento</p><h3>Para quem ensina hoje e abre caminhos para o amanhã.</h3></div>
+              <p>O Agenda Profissa celebra o trabalho indispensável dos professores, que transformam conhecimento em oportunidade e ajudam a construir uma sociedade mais consciente, preparada e humana.</p>
+            </aside>
           </div>
         </section>
 
