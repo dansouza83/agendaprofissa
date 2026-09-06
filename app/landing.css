@@ -684,8 +684,8 @@ html {
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(180deg, transparent 20%, #02080626 43%, #020806c2 72%, #010503fa 100%),
-    linear-gradient(90deg, #02080638 0%, transparent 72%);
+    linear-gradient(180deg, transparent 16%, #061e171f 35%, #073125c7 69%, #020e0afa 100%),
+    linear-gradient(125deg, #2e8b7252 0%, transparent 58%);
 }
 .segment-content {
   position: absolute;
@@ -1164,8 +1164,8 @@ html:not(.dark) .landing [class*="text-[#64756f]"] {
   }
   #segmentos .segment-shade {
     background:
-      linear-gradient(180deg, #0208065c 0%, #020806d6 48%, #010503fa 100%),
-      linear-gradient(90deg, #02080642 0%, transparent 78%);
+      linear-gradient(135deg, #164d3ccf 0%, #08241be8 48%, #020d09fc 100%),
+      linear-gradient(90deg, #1f7a5e42 0%, transparent 80%);
   }
   #segmentos .segment-content {
     padding: 1.15rem;
